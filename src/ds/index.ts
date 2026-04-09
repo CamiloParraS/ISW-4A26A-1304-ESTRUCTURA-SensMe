@@ -1,3 +1,3 @@
-export * from './Deque'
-export * from './LibraryMap'
-export * from './shuffle'
+export * from "./Deque";
+export * from "./LibraryMap";
+export * from "./shuffle";
