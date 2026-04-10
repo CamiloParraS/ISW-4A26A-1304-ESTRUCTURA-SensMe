@@ -1,6 +1,6 @@
 //www.geeksforgeeks.org/dsa/deque-data-structure/
 
-https: export class Deque<T> {
+export class Deque<T> {
   private items: T[] = [];
   private head = 0;
 
@@ -15,7 +15,10 @@ https: export class Deque<T> {
   popFront(): T | undefined {
     if (this.head >= this.items.length) return undefined;
 
-    return this.items[this.head++];
+    const item = this.items[this.head];
+    this.head += 1;
+    this.autoCompact();
+    return item;
   }
 
   peek(): T | undefined {
@@ -24,6 +27,7 @@ https: export class Deque<T> {
 
   replaceUpcoming(items: T[]): void {
     this.items = [...this.items.slice(0, this.head), ...items];
+    this.autoCompact(true);
   }
 
   toArray(): T[] {
@@ -41,5 +45,11 @@ https: export class Deque<T> {
   compact(): void {
     this.items = this.items.slice(this.head);
     this.head = 0;
+  }
+
+  private autoCompact(force = false): void {
+    if (force || (this.head > 1000 && this.head > this.items.length / 2)) {
+      this.compact();
+    }
   }
 }
