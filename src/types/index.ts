@@ -110,7 +110,7 @@ export interface ImportReconciliationCandidate {
   trackNumber: number | null;
 }
 
-export type SerializedTrack = TrackRecord;
+export type SerializedTrack = Omit<Track, "fileHandle">;
 export type SerializedPlaylist = Playlist;
 
 export type Theme = "light" | "dark" | "system";
