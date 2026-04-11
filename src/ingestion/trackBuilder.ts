@@ -1,3 +1,4 @@
+import type { MBResult } from "./musicbrainz";
 import type { RawMetadata } from "./metadataParser";
 import type { Track } from "../types";
 
@@ -10,6 +11,7 @@ export function buildTrack(
   handle: FileSystemFileHandle,
   filePath: string,
   raw: RawMetadata,
+  mb: MBResult | null,
   existingCoverArtUrl: string | null,
 ): Track {
   const artist = raw.artist || "Unknown Artist";
@@ -18,6 +20,8 @@ export function buildTrack(
   let coverArtUrl: string | null = null;
   if (raw.coverArt) {
     coverArtUrl = URL.createObjectURL(raw.coverArt);
+  } else if (mb?.coverArtUrl) {
+    coverArtUrl = mb.coverArtUrl;
   } else if (existingCoverArtUrl) {
     coverArtUrl = existingCoverArtUrl;
   }
