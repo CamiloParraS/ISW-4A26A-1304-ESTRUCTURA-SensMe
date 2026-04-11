@@ -1,19 +1,22 @@
-import { resolve } from 'node:path'
-import { defineConfig } from 'vitest/config'
-import react from '@vitejs/plugin-react'
+import { resolve } from "node:path";
+import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import path from "node:path/win32";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      'music-metadata/lib/core': resolve(
+      "@": path.resolve(__dirname, "./src"),
+      "music-metadata/lib/core": resolve(
         __dirname,
-        'node_modules/music-metadata/lib/core.js',
+        "node_modules/music-metadata/lib/core.js",
       ),
     },
   },
   test: {
-    environment: 'jsdom',
+    environment: "jsdom",
     globals: true,
   },
-})
+});
