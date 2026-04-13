@@ -74,7 +74,7 @@ export function OpenFolderButton() {
             <p className="open-folder-status">
                 {ingestion.total > 0
                     ? `${ingestion.processed} / ${ingestion.total} files processed`
-                    : "Pick a folder to begin."}
+                    : ""}
             </p>
         </div>
     );

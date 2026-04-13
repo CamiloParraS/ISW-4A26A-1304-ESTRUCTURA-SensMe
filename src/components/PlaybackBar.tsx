@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useRef, useState } from "react";
+import {
+    Pause,
+    Play,
+    Queue,
+    Repeat,
+    Shuffle,
+    SkipBack,
+    SkipForward,
+} from "@phosphor-icons/react";
 import { usePlaybackEngine } from "../hooks/usePlaybackEngine";
 import { useStore } from "../store";
 import { extractAccentColor } from "../utils/accentColor";
@@ -68,12 +77,16 @@ export function PlaybackBar() {
 
     const displayTime = isDragging ? seekTime : state.currentTime;
     const sliderValue = isDragging ? seekTime : Math.min(state.currentTime, state.duration || 1);
+    const seekProgress = state.duration > 0 ? Math.min(100, (sliderValue / state.duration) * 100) : 0;
+    const volumeProgress = Math.max(0, Math.min(100, state.volume * 100));
 
     const cycleRepeatMode = (): void => {
         const modes = ["off", "all", "one"] as const;
         const index = modes.indexOf(queueState.repeatMode);
         setRepeatMode(modes[(index + 1) % modes.length]);
     };
+
+    const isRepeatActive = queueState.repeatMode !== "off";
 
     return (
         <div className="playback-bar" aria-label="Playback controls">
@@ -89,106 +102,126 @@ export function PlaybackBar() {
                 </div>
             </div>
 
-            <div className="controls">
-                <button type="button" onClick={previous} aria-label="Previous track">
-                    Prev
-                </button>
-                <button
-                    type="button"
-                    onClick={() => {
-                        if (state.isPlaying) {
-                            pause();
-                        } else {
-                            void play();
-                        }
-                    }}
-                    aria-label={state.isPlaying ? "Pause" : "Play"}
-                    className="play-pause"
-                >
-                    {state.isPlaying ? "Pause" : "Play"}
-                </button>
-                <button type="button" onClick={next} aria-label="Next track">
-                    Next
-                </button>
+            <div className="playback-bar__center">
+                <div className="controls playback-bar__transport" aria-label="Playback controls">
+                    <button
+                        type="button"
+                        onClick={toggleShuffle}
+                        className="transport-button"
+                        aria-label="Shuffle"
+                        aria-pressed={queueState.shuffleEnabled}
+                        data-active={queueState.shuffleEnabled}
+                    >
+                        <Shuffle aria-hidden />
+                        <span className="sr-only">Shuffle</span>
+                    </button>
+
+                    <button type="button" onClick={previous} className="transport-button" aria-label="Previous track">
+                        <SkipBack aria-hidden />
+                        <span className="sr-only">Previous track</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (state.isPlaying) {
+                                pause();
+                            } else {
+                                void play();
+                            }
+                        }}
+                        aria-label={state.isPlaying ? "Pause" : "Play"}
+                        className="transport-button transport-button--primary"
+                    >
+                        {state.isPlaying ? <Pause aria-hidden /> : <Play aria-hidden />}
+                        <span className="sr-only">{state.isPlaying ? "Pause" : "Play"}</span>
+                    </button>
+
+                    <button type="button" onClick={next} className="transport-button" aria-label="Next track">
+                        <SkipForward aria-hidden />
+                        <span className="sr-only">Next track</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={cycleRepeatMode}
+                        className="transport-button"
+                        aria-label={`Repeat mode: ${queueState.repeatMode}`}
+                        aria-pressed={isRepeatActive}
+                        data-active={isRepeatActive}
+                    >
+                        <Repeat aria-hidden />
+                        <span className="sr-only">Repeat mode</span>
+                    </button>
+                </div>
+
+                <div className="seek-row playback-bar__seek-row">
+                    <span>{formatTime(displayTime)}</span>
+                    <input
+                        ref={seekBarRef}
+                        type="range"
+                        min={0}
+                        max={state.duration || 1}
+                        value={sliderValue}
+                        style={{ "--seek-progress": `${seekProgress}%` } as CSSProperties}
+                        onPointerDown={(event) => {
+                            isDraggingRef.current = true;
+                            setIsDragging(true);
+
+                            try {
+                                event.currentTarget.setPointerCapture(event.pointerId);
+                            } catch {
+                                // Some browsers can throw here. Safe to ignore.
+                            }
+
+                            const start = event.currentTarget.valueAsNumber;
+                            seekTimeRef.current = start;
+                            setSeekTime(start);
+                        }}
+                        onPointerUp={(event) => {
+                            const finalValue = event.currentTarget.valueAsNumber;
+
+                            try {
+                                event.currentTarget.releasePointerCapture(event.pointerId);
+                            } catch {
+                                // Ignore if capture was already lost.
+                            }
+
+                            seekTimeRef.current = finalValue;
+                            setSeekTime(finalValue);
+                            commitDragSeek(finalValue);
+                        }}
+                        onPointerCancel={() => {
+                            commitDragSeek();
+                        }}
+                        onInput={(event) => {
+                            const next = (event.target as HTMLInputElement).valueAsNumber;
+                            seekTimeRef.current = next;
+                            setSeekTime(next);
+                        }}
+                        className="seek-bar"
+                        aria-label="Seek position"
+                    />
+                    <span>{formatTime(state.duration)}</span>
+                </div>
             </div>
 
-            <div className="seek-row">
-                <span>{formatTime(displayTime)}</span>
-                <input
-                    ref={seekBarRef}
-                    type="range"
-                    min={0}
-                    max={state.duration || 1}
-                    value={sliderValue}
-                    onPointerDown={(event) => {
-                        isDraggingRef.current = true;
-                        setIsDragging(true);
-
-                        try {
-                            event.currentTarget.setPointerCapture(event.pointerId);
-                        } catch {
-                            // Some browsers can throw here. Safe to ignore.
-                        }
-
-                        const start = event.currentTarget.valueAsNumber;
-                        seekTimeRef.current = start;
-                        setSeekTime(start);
-                    }}
-                    onPointerUp={(event) => {
-                        const finalValue = event.currentTarget.valueAsNumber;
-
-                        try {
-                            event.currentTarget.releasePointerCapture(event.pointerId);
-                        } catch {
-                            // Ignore if capture was already lost.
-                        }
-
-                        seekTimeRef.current = finalValue;
-                        setSeekTime(finalValue);
-                        commitDragSeek(finalValue);
-                    }}
-                    onPointerCancel={() => {
-                        commitDragSeek();
-                    }}
-                    onInput={(event) => {
-                        const next = (event.target as HTMLInputElement).valueAsNumber;
-                        seekTimeRef.current = next;
-                        setSeekTime(next);
-                    }}
-                    className="seek-bar"
-                    aria-label="Seek position"
-                />
-                <span>{formatTime(state.duration)}</span>
-            </div>
-
-            <div className="secondary-controls">
-                <button
-                    type="button"
-                    onClick={toggleShuffle}
-                    className={queueState.shuffleEnabled ? "active" : ""}
-                    aria-label="Shuffle"
-                    aria-pressed={queueState.shuffleEnabled}
-                >
-                    Shuffle
-                </button>
-
-                <button type="button" onClick={cycleRepeatMode} aria-label="Repeat mode">
-                    Repeat: {queueState.repeatMode}
-                </button>
-
+            <div className="secondary-controls playback-bar__utility" aria-label="Utility controls">
                 <input
                     type="range"
                     min={0}
                     max={1}
                     step={0.01}
                     value={state.volume}
+                    style={{ "--volume-progress": `${volumeProgress}%` } as CSSProperties}
                     onChange={(event) => setVolume(Number(event.target.value))}
                     aria-label="Volume"
                     className="volume-bar"
                 />
 
-                <button type="button" onClick={() => setQueueOpen(true)} aria-label="Open queue">
-                    Queue
+                <button type="button" onClick={() => setQueueOpen(true)} className="utility-button" aria-label="Open queue">
+                    <Queue aria-hidden />
+                    <span className="sr-only">Open queue</span>
                 </button>
             </div>
         </div>
