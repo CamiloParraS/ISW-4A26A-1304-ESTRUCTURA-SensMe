@@ -52,7 +52,7 @@ export async function ingestFolder(
             );
           }
 
-          return buildTrack(handle, filePath, raw, mb?.coverArtUrl ?? null);
+          return buildTrack(handle, filePath, raw, mb, mb?.coverArtUrl ?? null);
         } catch (error) {
           const reason =
             error instanceof Error ? error.message : "Unknown error";

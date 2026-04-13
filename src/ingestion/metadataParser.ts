@@ -14,15 +14,18 @@ export interface RawMetadata {
 export async function parseMetadata(file: File): Promise<RawMetadata> {
   try {
     const buffer = new Uint8Array(await file.arrayBuffer());
-    const meta = await parseBuffer(buffer, file.type, {
-      skipPostHeaders: true,
-    });
+    const meta = await parseBuffer(buffer, file.type);
     const { common, format } = meta;
 
     let coverArt: Blob | null = null;
-    if (common.picture && common.picture.length > 0) {
-      const picture = common.picture[0];
-      coverArt = new Blob([picture.data.buffer.slice(0) as ArrayBuffer], {
+
+    const pictures = common.picture;
+
+    if (pictures && pictures.length > 0) {
+      const picture = pictures[0];
+      const data = new Uint8Array(picture.data);
+
+      coverArt = new Blob([data], {
         type: picture.format,
       });
     }
