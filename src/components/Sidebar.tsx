@@ -30,7 +30,7 @@ export function Sidebar() {
 
     return (
         <nav className="sidebar" aria-label="Main navigation">
-            <div className="sidebar-logo">WebPlayer</div>
+            <div className="sidebar-logo">SensMe</div>
 
             <ul className="sidebar-nav">
                 {navItems.map((item) => (
@@ -56,8 +56,8 @@ export function Sidebar() {
                         <button
                             type="button"
                             className={`nav-item ${view === "playlist" && activePlaylistId === playlist.id
-                                    ? "nav-item--active"
-                                    : ""
+                                ? "nav-item--active"
+                                : ""
                                 }`}
                             onClick={() => {
                                 setView("playlist");

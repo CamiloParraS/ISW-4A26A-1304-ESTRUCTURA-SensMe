@@ -27,6 +27,35 @@
   --ring: var(--accent);
   --primary: var(--text-primary);
   --primary-foreground: var(--surface);
+  /* Accessible accent: mix with black in light mode to darken pale accents */
+  --accent-contrast: color-mix(in oklab, var(--accent) 55%, #000 45%);
+}
+
+/* Krieg font for sidebar logo */
+@font-face {
+  font-family: "Krieg";
+  src: url("/src/assets/fonts/krieg-font/KriegFont-xqwj.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Krieg";
+  src: url("/src/assets/fonts/krieg-font/KriegFontOblique-pLBy.otf")
+    format("opentype");
+  font-weight: 700;
+  font-style: oblique;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Krieg";
+  src: url("/src/assets/fonts/krieg-font/KriegFontOppositeOblique-DypE.otf")
+    format("opentype");
+  font-weight: 700;
+  font-style: oblique;
+  font-display: swap;
 }
 
 [data-theme="dark"] {
@@ -50,6 +79,8 @@
   --ring: var(--accent);
   --primary: var(--text-primary);
   --primary-foreground: var(--surface);
+  /* Mix with white in dark mode to ensure visibility */
+  --accent-contrast: color-mix(in oklab, var(--accent) 55%, #fff 45%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -74,6 +105,8 @@
     --ring: var(--accent);
     --primary: var(--text-primary);
     --primary-foreground: var(--surface);
+    /* Mix with white when system prefers dark */
+    --accent-contrast: color-mix(in oklab, var(--accent) 55%, #fff 45%);
   }
 }
 
