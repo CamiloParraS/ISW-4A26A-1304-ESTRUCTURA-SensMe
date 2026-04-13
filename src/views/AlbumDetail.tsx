@@ -1,7 +1,7 @@
 import { useMemo } from "react";
+import { TrackRow } from "../components/TrackRow";
 import { useStore } from "../store";
 import type { Album, Track } from "../types";
-import { formatDuration } from "../utils/format";
 
 interface AlbumDetailProps {
     album: Album;
@@ -54,29 +54,30 @@ export function AlbumDetail({ album, onBack }: AlbumDetailProps) {
                 </div>
             </div>
 
-            <table className="track-table">
-                <thead>
-                    <tr>
-                        <th style={{ width: "60px" }}>#</th>
-                        <th>Title</th>
-                        <th style={{ width: "120px" }}>Duration</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {tracks.map((track, index) => (
-                        <tr key={track.id} className="track-row" onDoubleClick={() => playAll(index)}>
-                            <td className="tabular">{track.trackNumber ?? index + 1}</td>
-                            <td>
-                                <div>{track.title}</div>
-                                {track.artist !== album.artist && (
-                                    <div className="text-muted">{track.artist}</div>
-                                )}
-                            </td>
-                            <td className="text-muted tabular">{formatDuration(track.duration)}</td>
+            <div className="library-table-scroll">
+                <table className="track-table" role="grid">
+                    <thead>
+                        <tr>
+                            <th style={{ width: "48px" }}>#</th>
+                            <th style={{ width: "50%" }}>Title</th>
+                            <th style={{ width: "22%" }}>Artist</th>
+                            <th style={{ width: "11%" }}>Time</th>
+                            <th style={{ width: "11%" }}>Plays</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {tracks.map((track, index) => (
+                            <TrackRow
+                                key={track.id}
+                                track={track}
+                                index={index}
+                                onDoubleClick={() => playAll(index)}
+                                showAlbum={false}
+                            />
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </section>
     );
 }

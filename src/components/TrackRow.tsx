@@ -8,9 +8,10 @@ interface TrackRowProps {
     track: Track;
     index: number;
     onDoubleClick: () => void;
+    showAlbum?: boolean;
 }
 
-export function TrackRow({ track, index, onDoubleClick }: TrackRowProps) {
+export function TrackRow({ track, index, onDoubleClick, showAlbum = true }: TrackRowProps) {
     const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
     const currentTrackId = useStore((state) => state.queueState.currentTrackId);
     const isPlaying = track.id === currentTrackId;
@@ -37,7 +38,7 @@ export function TrackRow({ track, index, onDoubleClick }: TrackRowProps) {
                         title={track.title}
                         style={{
                             display: "inline-block",
-                            maxWidth: 240,
+                            maxWidth: 250,
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -64,23 +65,25 @@ export function TrackRow({ track, index, onDoubleClick }: TrackRowProps) {
                         {track.artist}
                     </span>
                 </td>
-                <td className="text-secondary">
-                    <span
-                        className="cell-text"
-                        aria-label={track.album}
-                        title={track.album}
-                        style={{
-                            display: "inline-block",
-                            maxWidth: 180,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            verticalAlign: "middle",
-                        }}
-                    >
-                        {track.album}
-                    </span>
-                </td>
+                {showAlbum && (
+                    <td className="text-secondary">
+                        <span
+                            className="cell-text"
+                            aria-label={track.album}
+                            title={track.album}
+                            style={{
+                                display: "inline-block",
+                                maxWidth: 180,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                verticalAlign: "middle",
+                            }}
+                        >
+
+                        </span>
+                    </td>
+                )}
                 <td className="text-muted tabular">
                     <span
                         className="cell-text"
