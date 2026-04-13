@@ -38,5 +38,7 @@ export function buildTrack(
     trackNumber: raw.trackNumber ?? null,
     duration: raw.duration,
     coverArtUrl,
+    playCount: 0,
+    lastPlayed: null,
   };
 }
