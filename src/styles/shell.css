@@ -676,7 +676,7 @@
 .transport-button[data-active="true"]:not(.transport-button--primary)::after {
   content: "";
   position: absolute;
-  bottom: -5px;
+  bottom: 8px;
   width: 4px;
   height: 4px;
   border-radius: 999px;
