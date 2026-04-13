@@ -1,8 +1,7 @@
-import { useState } from "react";
 import { ingestFolder } from "../ingestion/ingest";
 import { useToast } from "../hooks/useToast";
 import { useStore } from "../store";
-import { Button } from "./ui/button"
+import { Button } from "./ui/button";
 
 type DirectoryPickerWindow = Window & {
     showDirectoryPicker?: (options?: {
@@ -13,9 +12,9 @@ type DirectoryPickerWindow = Window & {
 export function OpenFolderButton() {
     const addTracks = useStore((state) => state.addTracks);
     const existingPaths = useStore((state) => state.existingPaths);
+    const ingestion = useStore((state) => state.ingestionProgress);
+    const setIngestionProgress = useStore((state) => state.setIngestionProgress);
     const { toast } = useToast();
-    const [isImporting, setIsImporting] = useState(false);
-    const [progress, setProgress] = useState({ processed: 0, total: 0 });
 
     async function handleClick() {
         const pickerWindow = window as DirectoryPickerWindow;
@@ -33,21 +32,27 @@ export function OpenFolderButton() {
             return;
         }
 
-        setIsImporting(true);
-        setProgress({ processed: 0, total: 0 });
+        setIngestionProgress({
+            isImporting: true,
+            processed: 0,
+            total: 0,
+        });
 
         try {
             await ingestFolder(rootHandle, existingPaths, {
                 onBatch: (tracks) => addTracks(tracks),
                 onError: (error) => toast(`Could not read "${error.fileName}"`, "error"),
-                onTotal: (total) => setProgress({ processed: 0, total }),
-                onProgress: (processed) =>
-                    setProgress((current) => ({ ...current, processed })),
+                onTotal: (total) => setIngestionProgress({ processed: 0, total }),
+                onProgress: (processed) => setIngestionProgress({ processed }),
             });
         } finally {
-            setIsImporting(false);
+            setIngestionProgress({ isImporting: false });
         }
     }
+
+    const progressPct = ingestion.total > 0
+        ? Math.round((ingestion.processed / ingestion.total) * 100)
+        : 0;
 
     return (
         <div className="open-folder-wrap">
@@ -55,15 +60,20 @@ export function OpenFolderButton() {
                 variant="outline"
                 size="sm"
                 type="button"
-                className="filter-reset open-folder-btn"
+                className="open-folder-btn"
                 onClick={handleClick}
-                disabled={isImporting}
+                disabled={ingestion.isImporting}
             >
-                {isImporting ? "Importing..." : "Open Folder"}
+                {ingestion.isImporting ? "Importing..." : "Open Folder"}
             </Button>
+            {ingestion.isImporting && ingestion.total > 0 && (
+                <div className="ingestion-progress" role="progressbar" aria-valuemin={0} aria-valuemax={ingestion.total} aria-valuenow={ingestion.processed}>
+                    <div className="ingestion-progress-fill" style={{ width: `${progressPct}%` }} />
+                </div>
+            )}
             <p className="open-folder-status">
-                {progress.total > 0
-                    ? `${progress.processed} / ${progress.total} files processed`
+                {ingestion.total > 0
+                    ? `${ingestion.processed} / ${ingestion.total} files processed`
                     : "Pick a folder to begin."}
             </p>
         </div>
