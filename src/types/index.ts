@@ -24,6 +24,8 @@ export interface Track {
   trackNumber: number | null;
   duration: number;
   coverArtUrl: string | null;
+  playCount: number;
+  lastPlayed: number | null;
 }
 
 export interface TrackStats {
