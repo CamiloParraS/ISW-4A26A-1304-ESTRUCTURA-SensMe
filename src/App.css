@@ -16,11 +16,6 @@
   transition: box-shadow 200ms ease;
 }
 
-.hero-panel:hover,
-.library-panel:hover {
-  box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
-}
-
 /* Hero Section */
 .hero-panel {
   padding: 48px;
@@ -665,5 +660,286 @@
     left: 10px;
     bottom: 10px;
     width: auto;
+  }
+}
+
+.app-shell {
+  padding-bottom: 172px;
+}
+
+.track-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.track-actions button {
+  min-height: 30px;
+  font-size: 0.78rem;
+}
+
+.playback-bar {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 12px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: linear-gradient(
+    135deg,
+    var(--card),
+    color-mix(in oklab, var(--primary) 4%, var(--card))
+  );
+  box-shadow: 0 10px 30px rgb(0 0 0 / 12%);
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 1fr) minmax(210px, 0.9fr) minmax(240px, 1.2fr)
+    auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 14px;
+  z-index: 25;
+}
+
+.playback-bar button,
+.playback-bar input {
+  font: inherit;
+}
+
+.track-info {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+}
+
+.mini-cover {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--primary) 5%, var(--card));
+  flex-shrink: 0;
+}
+
+.mini-cover--placeholder {
+  display: inline-block;
+}
+
+.track-text {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.track-title,
+.track-artist {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.track-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.track-artist {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+.controls,
+.secondary-controls,
+.seek-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.controls button,
+.secondary-controls button {
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--foreground);
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.controls button:hover,
+.secondary-controls button:hover {
+  border-color: var(--accent);
+}
+
+.controls .play-pause {
+  font-weight: 600;
+}
+
+.seek-row {
+  min-width: 0;
+}
+
+.seek-row span {
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+
+.seek-bar,
+.volume-bar {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.volume-bar {
+  width: 110px;
+}
+
+.secondary-controls .active {
+  border-color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 8%, var(--card));
+}
+
+.queue-panel {
+  position: fixed;
+  right: 16px;
+  bottom: 98px;
+  width: min(440px, calc(100vw - 32px));
+  max-height: min(62vh, 640px);
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: 0 14px 36px rgb(0 0 0 / 15%);
+  padding: 16px;
+  z-index: 30;
+  display: grid;
+  gap: 16px;
+}
+
+.queue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.queue-header h2,
+.queue-panel h3 {
+  margin: 0;
+}
+
+.queue-panel h3 {
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+
+.queue-header button {
+  min-height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--foreground);
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.queue-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.queue-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--primary) 2%, var(--card));
+  padding: 9px 11px;
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.queue-item img {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.queue-cover-placeholder {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--primary) 6%, var(--card));
+}
+
+.queue-item--current {
+  grid-template-columns: 34px 1fr auto;
+  border-color: color-mix(in oklab, var(--accent) 28%, var(--border));
+  background: color-mix(in oklab, var(--accent) 6%, var(--card));
+}
+
+.queue-item .muted,
+.queue-panel .muted {
+  color: var(--muted-foreground);
+  font-size: 0.84rem;
+}
+
+.queue-index {
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1200px) {
+  .playback-bar {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .seek-row,
+  .secondary-controls,
+  .controls {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    padding-bottom: 240px;
+  }
+
+  .playback-bar {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .queue-panel {
+    right: 8px;
+    bottom: 210px;
+    width: calc(100vw - 16px);
+    border-radius: 14px;
+    padding: 12px;
+  }
+
+  .track-actions {
+    justify-content: flex-start;
+  }
+
+  .secondary-controls {
+    flex-wrap: wrap;
   }
 }
