@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePlaybackEngine } from "../hooks/usePlaybackEngine";
 import { useStore } from "../store";
+import { extractAccentColor } from "../utils/accentColor";
 
 function formatTime(seconds: number): string {
     if (!Number.isFinite(seconds)) {
@@ -18,24 +19,23 @@ function formatTime(seconds: number): string {
 export function PlaybackBar() {
     const { state, play, pause, seek, setVolume, previous, next } = usePlaybackEngine();
     const [isDragging, setIsDragging] = useState(false);
+    const isDraggingRef = useRef(false);
     const [seekTime, setSeekTime] = useState(0);
     const seekTimeRef = useRef(seekTime);
+    const seekBarRef = useRef<HTMLInputElement | null>(null);
 
-    useEffect(() => {
-        seekTimeRef.current = seekTime;
-    }, [seekTime]);
+    const commitDragSeek = useCallback((finalTime?: number) => {
+        if (!isDraggingRef.current) {
+            return;
+        }
 
-    useEffect(() => {
-        if (!isDragging) return;
+        const time = finalTime ?? seekTimeRef.current;
+        isDraggingRef.current = false;
+        setIsDragging(false);
+        seek(time);
+    }, [seek]);
 
-        const onUp = () => {
-            setIsDragging(false);
-            seek(seekTimeRef.current);
-        };
-
-        window.addEventListener("pointerup", onUp);
-        return () => window.removeEventListener("pointerup", onUp);
-    }, [isDragging, seek]);
+    // Pointer capture is used on the input element; no window-level pointerup listener required.
 
     const queueState = useStore((store) => store.queueState);
     const library = useStore((store) => store.library);
@@ -46,6 +46,25 @@ export function PlaybackBar() {
     const track = queueState.currentTrackId
         ? library.get(queueState.currentTrackId)
         : null;
+
+    useEffect(() => {
+        let active = true;
+
+        if (!track?.coverArtUrl) {
+            document.documentElement.style.setProperty("--accent", "#1db954");
+            return;
+        }
+
+        void extractAccentColor(track.coverArtUrl).then((color) => {
+            if (active) {
+                document.documentElement.style.setProperty("--accent", color);
+            }
+        });
+
+        return () => {
+            active = false;
+        };
+    }, [track?.coverArtUrl]);
 
     const displayTime = isDragging ? seekTime : state.currentTime;
     const sliderValue = isDragging ? seekTime : Math.min(state.currentTime, state.duration || 1);
@@ -93,26 +112,48 @@ export function PlaybackBar() {
                 </button>
             </div>
 
-
             <div className="seek-row">
                 <span>{formatTime(displayTime)}</span>
                 <input
+                    ref={seekBarRef}
                     type="range"
                     min={0}
                     max={state.duration || 1}
                     value={sliderValue}
-                    onPointerDown={() => {
+                    onPointerDown={(event) => {
+                        isDraggingRef.current = true;
                         setIsDragging(true);
-                        setSeekTime(state.currentTime);
-                    }}
-                    onChange={(event) => {
-                        const next = Number((event.target as HTMLInputElement).value);
-                        if (isDragging) {
-                            setSeekTime(next);
-                            return;
+
+                        try {
+                            event.currentTarget.setPointerCapture(event.pointerId);
+                        } catch {
+                            // Some browsers can throw here. Safe to ignore.
                         }
 
-                        seek(next);
+                        const start = event.currentTarget.valueAsNumber;
+                        seekTimeRef.current = start;
+                        setSeekTime(start);
+                    }}
+                    onPointerUp={(event) => {
+                        const finalValue = event.currentTarget.valueAsNumber;
+
+                        try {
+                            event.currentTarget.releasePointerCapture(event.pointerId);
+                        } catch {
+                            // Ignore if capture was already lost.
+                        }
+
+                        seekTimeRef.current = finalValue;
+                        setSeekTime(finalValue);
+                        commitDragSeek(finalValue);
+                    }}
+                    onPointerCancel={() => {
+                        commitDragSeek();
+                    }}
+                    onInput={(event) => {
+                        const next = (event.target as HTMLInputElement).valueAsNumber;
+                        seekTimeRef.current = next;
+                        setSeekTime(next);
                     }}
                     className="seek-bar"
                     aria-label="Seek position"
