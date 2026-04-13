@@ -119,7 +119,13 @@ export async function hydrateLibrary(
           }
         }
 
-        return { ...track, coverArtUrl, fileHandle: handle };
+        return {
+          ...track,
+          coverArtUrl,
+          fileHandle: handle,
+          playCount: track.playCount ?? 0,
+          lastPlayed: track.lastPlayed ?? null,
+        };
       } catch {
         return null;
       }

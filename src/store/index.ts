@@ -4,7 +4,6 @@ import {
   saveHandle,
   saveLibrary,
   savePlaylists,
-  saveQueueState,
   saveTheme,
 } from "../persistence";
 import type {
@@ -15,6 +14,7 @@ import type {
   Track,
   TrackId,
 } from "../types";
+import { createQueueSlice, type QueueSlice } from "./queueSlice";
 
 interface LibrarySlice {
   library: LibraryMap;
@@ -29,11 +29,6 @@ interface LibrarySlice {
 interface PlaylistSlice {
   playlists: Playlist[];
   setPlaylists: (playlists: Playlist[]) => void;
-}
-
-interface QueueSlice {
-  queueState: QueueState;
-  setQueueState: (queueState: QueueState) => void;
 }
 
 interface UISlice {
@@ -57,12 +52,12 @@ export const defaultQueueState: QueueState = {
   originalOrder: [],
 };
 
-export const useStore = create<Store>((set) => ({
+export const useStore = create<Store>((set, get) => ({
   library: new LibraryMap(),
   libraryVersion: 0,
   existingPaths: new Set<string>(),
   playlists: [],
-  queueState: defaultQueueState,
+  ...createQueueSlice(set, get),
   theme: "system",
   activeView: "library",
   activePlaylistId: null,
@@ -191,11 +186,6 @@ export const useStore = create<Store>((set) => ({
     set(() => {
       savePlaylists(playlists);
       return { playlists };
-    }),
-  setQueueState: (queueState) =>
-    set(() => {
-      saveQueueState(queueState);
-      return { queueState };
     }),
   setTheme: (theme) =>
     set(() => {
