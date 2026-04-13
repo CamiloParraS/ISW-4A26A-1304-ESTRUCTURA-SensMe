@@ -1,14 +1,19 @@
+import { Moon, Sun } from "@phosphor-icons/react";
 import { OpenFolderButton } from "./OpenFolderButton";
 import { useStore } from "../store";
 import type { Theme } from "../types";
 
+function getResolvedTheme(theme: Theme): "light" | "dark" {
+    if (theme === "system") {
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+
+    return theme;
+}
+
 function nextTheme(theme: Theme): Theme {
     if (theme === "dark") {
         return "light";
-    }
-
-    if (theme === "light") {
-        return "system";
     }
 
     return "dark";
@@ -22,6 +27,7 @@ export function Sidebar() {
     const setActivePlaylist = useStore((state) => state.setActivePlaylistId);
     const theme = useStore((state) => state.theme);
     const setTheme = useStore((state) => state.setTheme);
+    const resolvedTheme = getResolvedTheme(theme);
 
     const navItems = [
         { id: "library" as const, label: "Library", icon: "LIB" },
@@ -30,7 +36,22 @@ export function Sidebar() {
 
     return (
         <nav className="sidebar" aria-label="Main navigation">
-            <div className="sidebar-logo">SensMe</div>
+            <div className="sidebar-top">
+                <div className="sidebar-logo">SensMe</div>
+                <button
+                    type="button"
+                    className="theme-toggle"
+                    onClick={() => setTheme(nextTheme(theme))}
+                    aria-label={resolvedTheme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+                    title={resolvedTheme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+                >
+                    {resolvedTheme === "dark" ? (
+                        <Sun size={16} weight="bold" aria-hidden />
+                    ) : (
+                        <Moon size={16} weight="bold" aria-hidden />
+                    )}
+                </button>
+            </div>
 
             <ul className="sidebar-nav">
                 {navItems.map((item) => (
@@ -75,14 +96,6 @@ export function Sidebar() {
 
             <div className="sidebar-footer">
                 <OpenFolderButton />
-                <button
-                    type="button"
-                    className="theme-toggle"
-                    onClick={() => setTheme(nextTheme(theme))}
-                    aria-label="Toggle theme"
-                >
-                    Theme: {theme}
-                </button>
             </div>
         </nav>
     );
