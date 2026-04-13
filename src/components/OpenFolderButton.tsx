@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ingestFolder } from "../ingestion/ingest";
 import { useToast } from "../hooks/useToast";
 import { useStore } from "../store";
+import { Button } from "./ui/button"
 
 type DirectoryPickerWindow = Window & {
     showDirectoryPicker?: (options?: {
@@ -50,9 +51,16 @@ export function OpenFolderButton() {
 
     return (
         <div className="open-folder-wrap">
-            <button type="button" className="open-folder-btn" onClick={handleClick} disabled={isImporting}>
+            <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                className="filter-reset open-folder-btn"
+                onClick={handleClick}
+                disabled={isImporting}
+            >
                 {isImporting ? "Importing..." : "Open Folder"}
-            </button>
+            </Button>
             <p className="open-folder-status">
                 {progress.total > 0
                     ? `${progress.processed} / ${progress.total} files processed`

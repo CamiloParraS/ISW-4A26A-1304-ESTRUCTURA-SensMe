@@ -69,6 +69,24 @@ export const useStore = create<Store>((set) => ({
   isQueueOpen: false,
   setLibrary: (tracks) =>
     set((state) => {
+      // Revoke any existing blob: object URLs from the previous library
+      try {
+        for (const existing of state.library.toArray()) {
+          if (
+            existing.coverArtUrl &&
+            existing.coverArtUrl.startsWith("blob:")
+          ) {
+            try {
+              URL.revokeObjectURL(existing.coverArtUrl);
+            } catch {
+              // ignore
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
+
       const library = new LibraryMap();
 
       for (const track of tracks) {
@@ -121,6 +139,15 @@ export const useStore = create<Store>((set) => ({
 
       if (!track) {
         return {};
+      }
+
+      // If the track used a blob object URL for cover art, revoke it to free memory
+      if (track.coverArtUrl && track.coverArtUrl.startsWith("blob:")) {
+        try {
+          URL.revokeObjectURL(track.coverArtUrl);
+        } catch {
+          // ignore
+        }
       }
 
       state.library.remove(id);

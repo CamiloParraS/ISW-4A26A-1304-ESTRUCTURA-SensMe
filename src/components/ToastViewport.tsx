@@ -1,4 +1,5 @@
 import type { ToastMessage } from "../hooks/useToast";
+import { Button } from "./ui/button";
 
 interface ToastViewportProps {
     toasts: ToastMessage[];
@@ -14,9 +15,9 @@ export function ToastViewport({ toasts, onDismiss }: ToastViewportProps) {
                         <strong>{toast.type}</strong>
                         <p>{toast.message}</p>
                     </div>
-                    <button type="button" className="toast-dismiss" onClick={() => onDismiss(toast.id)}>
+                    <Button variant="ghost" size="sm" className="toast-dismiss" onClick={() => onDismiss(toast.id)}>
                         Dismiss
-                    </button>
+                    </Button>
                 </article>
             ))}
         </div>
