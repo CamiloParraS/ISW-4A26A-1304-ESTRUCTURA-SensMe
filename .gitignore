@@ -1,5 +1,6 @@
 # Logs
 logs
+skills-lock.json
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -18,6 +19,7 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 .DS_Store
+.agents
 *.suo
 *.ntvs*
 *.njsproj
