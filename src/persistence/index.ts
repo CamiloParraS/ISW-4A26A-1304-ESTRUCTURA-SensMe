@@ -1,4 +1,5 @@
 import { get as idbGet, set as idbSet } from "idb-keyval";
+import { parseMetadata } from "../ingestion/metadataParser";
 import type {
   Playlist,
   QueueState,
@@ -70,6 +71,7 @@ export async function hydrateLibrary(
   serialized: SerializedTrack[],
 ): Promise<Track[]> {
   type PermissionHandle = FileSystemFileHandle & {
+    getFile: () => Promise<File>;
     queryPermission: (descriptor: {
       mode: "read" | "readwrite";
     }) => Promise<"granted" | "denied" | "prompt">;
@@ -100,7 +102,24 @@ export async function hydrateLibrary(
           }
         }
 
-        return { ...track, fileHandle: handle };
+        let coverArtUrl = track.coverArtUrl;
+
+        if (coverArtUrl?.startsWith("blob:")) {
+          try {
+            const file = await permissionHandle.getFile();
+            const raw = await parseMetadata(file);
+
+            if (raw.coverArt) {
+              coverArtUrl = URL.createObjectURL(raw.coverArt);
+            } else {
+              coverArtUrl = null;
+            }
+          } catch {
+            coverArtUrl = null;
+          }
+        }
+
+        return { ...track, coverArtUrl, fileHandle: handle };
       } catch {
         return null;
       }
