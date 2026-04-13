@@ -69,9 +69,56 @@ function AlbumCard({ album, onClick }: { album: Album; onClick: () => void }) {
                     </div>
                 )}
             </div>
-            <p className="album-card-title">{album.title}</p>
-            <p className="album-card-artist">{album.artist}</p>
-            {album.year && <p className="album-card-year">{album.year}</p>}
+            <p className="album-card-title">
+                <span
+                    aria-label={album.title}
+                    title={album.title}
+                    style={{
+                        display: "inline-block",
+                        maxWidth: 150,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        verticalAlign: "middle",
+                    }}
+                >
+                    {album.title}
+                </span>
+            </p>
+            <p className="album-card-artist">
+                <span
+                    aria-label={album.artist}
+                    title={album.artist}
+                    style={{
+                        display: "inline-block",
+                        maxWidth: 140,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        verticalAlign: "middle",
+                    }}
+                >
+                    {album.artist}
+                </span>
+            </p>
+            {album.year && (
+                <p className="album-card-year">
+                    <span
+                        aria-label={String(album.year)}
+                        title={String(album.year)}
+                        style={{
+                            display: "inline-block",
+                            maxWidth: 80,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            verticalAlign: "middle",
+                        }}
+                    >
+                        {album.year}
+                    </span>
+                </p>
+            )}
         </button>
     );
 }
