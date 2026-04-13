@@ -10,11 +10,18 @@ import type {
   Playlist,
   PlaylistId,
   QueueState,
+  SortState,
   Theme,
   Track,
   TrackId,
 } from "../types";
 import { createQueueSlice, type QueueSlice } from "./queueSlice";
+
+interface IngestionProgress {
+  isImporting: boolean;
+  processed: number;
+  total: number;
+}
 
 interface LibrarySlice {
   library: LibraryMap;
@@ -35,9 +42,16 @@ interface UISlice {
   theme: Theme;
   activeView: "library" | "albums" | "playlist";
   activePlaylistId: PlaylistId | null;
+  sortState: SortState;
+  libraryQuery: string;
+  ingestionProgress: IngestionProgress;
   isQueueOpen: boolean;
   setTheme: (theme: Theme) => void;
   setActiveView: (view: UISlice["activeView"]) => void;
+  setActivePlaylistId: (playlistId: PlaylistId | null) => void;
+  setSortState: (sortState: SortState) => void;
+  setLibraryQuery: (query: string) => void;
+  setIngestionProgress: (patch: Partial<IngestionProgress>) => void;
   setQueueOpen: (open: boolean) => void;
 }
 
@@ -61,6 +75,16 @@ export const useStore = create<Store>((set, get) => ({
   theme: "system",
   activeView: "library",
   activePlaylistId: null,
+  sortState: {
+    field: "title",
+    dir: "asc",
+  },
+  libraryQuery: "",
+  ingestionProgress: {
+    isImporting: false,
+    processed: 0,
+    total: 0,
+  },
   isQueueOpen: false,
   setLibrary: (tracks) =>
     set((state) => {
@@ -193,5 +217,15 @@ export const useStore = create<Store>((set, get) => ({
       return { theme };
     }),
   setActiveView: (activeView) => set({ activeView }),
+  setActivePlaylistId: (activePlaylistId) => set({ activePlaylistId }),
+  setSortState: (sortState) => set({ sortState }),
+  setLibraryQuery: (libraryQuery) => set({ libraryQuery }),
+  setIngestionProgress: (patch) =>
+    set((state) => ({
+      ingestionProgress: {
+        ...state.ingestionProgress,
+        ...patch,
+      },
+    })),
   setQueueOpen: (isQueueOpen) => set({ isQueueOpen }),
 }));

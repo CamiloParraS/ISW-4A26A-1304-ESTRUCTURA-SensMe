@@ -116,3 +116,11 @@ export type SerializedTrack = Omit<Track, "fileHandle">;
 export type SerializedPlaylist = Playlist;
 
 export type Theme = "light" | "dark" | "system";
+
+export type SortField = "title" | "artist" | "album" | "duration" | "playCount";
+export type SortDir = "asc" | "desc";
+
+export interface SortState {
+  field: SortField;
+  dir: SortDir;
+}
