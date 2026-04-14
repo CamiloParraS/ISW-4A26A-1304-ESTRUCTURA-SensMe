@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { TrackRow } from "../components/TrackRow";
 import { useStore } from "../store";
 import type { Album, Track } from "../types";
+import { ArrowBendUpLeftIcon as ArrowBendLeftUpIcon } from "@phosphor-icons/react/dist/ssr";
 
 interface AlbumDetailProps {
     album: Album;
@@ -30,7 +31,8 @@ export function AlbumDetail({ album, onBack }: AlbumDetailProps) {
     return (
         <section className="album-detail">
             <button type="button" className="back-btn" onClick={onBack}>
-                {"<- Albums"}
+                <ArrowBendLeftUpIcon size={16} weight="bold" aria-hidden />
+                <span style={{ marginLeft: 8 }}>Albums</span>
             </button>
 
             <div className="album-hero">

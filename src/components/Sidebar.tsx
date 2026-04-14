@@ -1,4 +1,4 @@
-import { Moon, Sun } from "@phosphor-icons/react";
+import { Moon, Sun, Book, List } from "@phosphor-icons/react";
 import { OpenFolderButton } from "./OpenFolderButton";
 import { useStore } from "../store";
 import type { Theme } from "../types";
@@ -30,8 +30,8 @@ export function Sidebar() {
     const resolvedTheme = getResolvedTheme(theme);
 
     const navItems = [
-        { id: "library" as const, label: "Library", icon: "LIB" },
-        { id: "albums" as const, label: "Albums", icon: "ALB" },
+        { id: "library" as const, label: "Library", icon: <Book size={16} weight="bold" aria-hidden /> },
+        { id: "albums" as const, label: "Albums", icon: <List size={16} weight="bold" aria-hidden /> },
     ];
 
     return (

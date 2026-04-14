@@ -3,6 +3,7 @@ import { useStore } from "../store";
 import type { Track } from "../types";
 import { formatDuration } from "../utils/format";
 import { ContextMenu } from "./ContextMenu";
+import { WaveformIcon } from "@phosphor-icons/react";
 
 interface TrackRowProps {
     track: Track;
@@ -29,7 +30,16 @@ export function TrackRow({ track, index, onDoubleClick, showAlbum = true }: Trac
                 onContextMenu={handleContextMenu}
                 aria-selected={isPlaying}
             >
-                <td className="track-index">{isPlaying ? "PLAY" : index + 1}</td>
+                <td className="track-index">
+                    {isPlaying ? (
+                        <>
+                            <WaveformIcon size={16} weight="bold" aria-hidden />
+                            <span className="sr-only">Playing</span>
+                        </>
+                    ) : (
+                        index + 1
+                    )}
+                </td>
                 <td className="track-title-cell">
                     {track.coverArtUrl && <img src={track.coverArtUrl} alt="" className="row-thumb" />}
                     <span
@@ -80,7 +90,7 @@ export function TrackRow({ track, index, onDoubleClick, showAlbum = true }: Trac
                                 verticalAlign: "middle",
                             }}
                         >
-
+                            {track.album}
                         </span>
                     </td>
                 )}

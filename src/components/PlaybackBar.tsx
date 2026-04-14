@@ -1,12 +1,13 @@
 import { type CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 import {
-    Pause,
-    Play,
-    Queue,
-    Repeat,
-    Shuffle,
-    SkipBack,
-    SkipForward,
+    PauseIcon as Pause,
+    PlayIcon as Play,
+    QueueIcon as Queue,
+    RepeatOnceIcon as RepeatOne,
+    RepeatIcon as Repeat,
+    ShuffleIcon as Shuffle,
+    SkipBackIcon as SkipBack,
+    SkipForwardIcon as SkipForward,
 } from "@phosphor-icons/react";
 import { usePlaybackEngine } from "../hooks/usePlaybackEngine";
 import { useStore } from "../store";
@@ -150,7 +151,11 @@ export function PlaybackBar() {
                         aria-pressed={isRepeatActive}
                         data-active={isRepeatActive}
                     >
-                        <Repeat aria-hidden />
+                        {queueState.repeatMode === "one" ? (
+                            <RepeatOne aria-hidden />
+                        ) : (
+                            <Repeat aria-hidden />
+                        )}
                         <span className="sr-only">Repeat mode</span>
                     </button>
                 </div>
