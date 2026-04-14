@@ -1,15 +1,29 @@
 .library-view,
 .albums-view,
 .album-detail,
-.playlist-placeholder {
+.playlist-placeholder,
+.playlist-view {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 20px;
 }
 
+/* Make the library view fill the main content area and let the
+   table scroll area size to the available space instead of using
+   viewport-based calculations. This prevents overflow issues. */
+.library-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
 .library-table-scroll {
-  max-height: calc(100vh - 230px);
+  /* let the scroll area grow to fill remaining space */
+  max-height: none;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: auto;
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
@@ -52,10 +66,90 @@
   background: color-mix(in srgb, var(--accent) 14%, var(--surface));
 }
 
+.track-row--menu-open {
+  background: color-mix(in srgb, var(--accent) 34%, var(--surface));
+}
+
 .track-index {
   color: var(--text-muted);
   font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
+}
+
+.drag-source-cell {
+  cursor: grab;
+}
+
+.drag-source-cell:active {
+  cursor: grabbing;
+}
+
+.drag-handle-cell {
+  width: 42px;
+}
+
+.drag-handle {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  display: inline-grid;
+  place-items: center;
+  cursor: grab;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.track-row-action-cell {
+  width: 34px;
+  text-align: right;
+  padding-right: 4px;
+}
+
+.track-row-menu-btn {
+  width: 24px;
+  height: 24px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--transition),
+    background var(--transition),
+    border-color var(--transition),
+    color var(--transition);
+}
+
+.track-row:hover .track-row-menu-btn,
+.track-row:focus-within .track-row-menu-btn,
+.track-row-menu-btn[aria-expanded="true"] {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.track-row-menu-btn:hover,
+.track-row-menu-btn:focus-visible {
+  border-color: var(--border);
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+.track-row-menu-btn span {
+  display: inline-flex;
+}
+
+body.context-menu-open .main-content,
+body.context-menu-open .library-table-scroll {
+  overflow: hidden !important;
 }
 
 .track-title-cell {
@@ -252,6 +346,102 @@
 .album-hero-info p {
   margin: 0;
   color: var(--text-secondary);
+}
+
+.playlist-hero {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  margin: 10px 0 20px;
+}
+
+.playlist-hero-art {
+  width: 200px;
+  height: 200px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.playlist-hero-info {
+  display: grid;
+  gap: 6px;
+}
+
+.playlist-hero-info .label {
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-size: 0.72rem;
+  margin: 0;
+}
+
+.playlist-hero-info h1 {
+  margin: 0;
+}
+
+.playlist-hero-info p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.playlist-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.playlist-actions button {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  min-height: 34px;
+  background: var(--surface);
+  color: inherit;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.playlist-actions .danger {
+  color: #b63f3f;
+}
+
+.playlist-art-placeholder,
+.playlist-art-single {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.playlist-art-placeholder {
+  background: var(--surface-2);
+}
+
+.playlist-art-mosaic {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.mosaic-cell {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 860px) {
+  .playlist-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .playlist-hero-art {
+    width: 180px;
+    height: 180px;
+  }
 }
 
 .playlist-placeholder h1 {

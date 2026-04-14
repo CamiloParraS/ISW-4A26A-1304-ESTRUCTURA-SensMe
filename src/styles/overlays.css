@@ -136,6 +136,67 @@
   background: var(--surface-2);
 }
 
+.context-item--danger {
+  color: #b63f3f;
+}
+
+.context-item--danger:hover {
+  background: color-mix(in srgb, #b63f3f 12%, var(--surface));
+}
+
+.context-divider {
+  width: 100%;
+  height: 1px;
+  border: 0;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+.context-submenu-label {
+  padding: 2px 8px;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.context-submenu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.context-new-playlist {
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
+.checkmark {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.drag-ghost {
+  min-width: 180px;
+  max-width: min(320px, calc(100vw - 24px));
+  display: grid;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface) 85%, var(--accent) 15%);
+  padding: 10px 12px;
+  box-shadow: 0 14px 24px rgb(0 0 0 / 22%);
+}
+
+.drag-ghost span {
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .toast-viewport {
   position: fixed;
   right: 18px;

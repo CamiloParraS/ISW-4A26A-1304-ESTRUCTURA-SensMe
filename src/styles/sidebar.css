@@ -89,6 +89,11 @@
   border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
 }
 
+.nav-item--drop-target {
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+  background: color-mix(in srgb, var(--accent) 24%, var(--surface));
+}
+
 .nav-icon {
   display: inline-flex;
   font-size: 0.68rem;
@@ -105,7 +110,22 @@
 .sidebar-footer {
   margin-top: 16px;
   display: block;
-  padding-bottom: 72px;
+  padding-bottom: 20px;
+}
+
+.new-playlist-btn {
+  margin-top: 10px;
+  min-height: 34px;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.new-playlist-btn:hover {
+  background: var(--surface-2);
 }
 
 .sidebar-footer .footer-actions {
