@@ -1,22 +1,16 @@
 # Doubly Linked List (ChainBuffer)
 
-Resumen
+En este proyecto se usa una doubly linked list llamada `ChainBuffer` para manejar la cola de reproducción. Cada nodo conoce el elemento anterior y el siguiente, así que movernos hacia adelante o hacia atrás es directo.
 
-- En este proyecto se utiliza una estructura de lista doblemente enlazada llamada `ChainBuffer` para operaciones de cola y manipulación eficiente de la lista de reproducción.
+Eso es útil para una cola de música porque muchas acciones cambian el primer, el último o un elemento intermedio de la lista. En vez de reconstruir todo el arreglo cada vez, `ChainBuffer` permite insertar, quitar o mover canciones de forma más natural para este caso.
 
-Implementación en este repo
+## Dónde se usa
 
-- La implementación está en [src/ds/ChainBuffer.ts](src/ds/ChainBuffer.ts#L1).
-  - Tipos clave: `ChainCell<T>` (nodo con `item`, `before`, `after`).
-  - Métodos principales: `addStart`, `addEnd`, `addAt`, `takeStart`, `takeEnd`, `takeAt`, `detachCell`, `exportItems`, `loadItems`, `readStart`, `readEnd`, `getCount`, `isEmpty`.
+La implementación está en [src/ds/ChainBuffer.ts](src/ds/ChainBuffer.ts#L1).
 
-Dónde se utiliza en la aplicación
+En la cola de reproducción, `queueSlice` convierte la lista actual a un `ChainBuffer` cuando necesita hacer cambios mutables y luego vuelve a exportarla como arreglo: [src/store/queueSlice.ts](src/store/queueSlice.ts#L1).
 
-- El slice de la cola (`queueSlice`) convierte la cola actual en un `ChainBuffer` cuando necesita hacer operaciones mutables y luego exporta el resultado como arreglo: [src/store/queueSlice.ts](src/store/queueSlice.ts#L1).
-  - Ejemplos de uso en `queueSlice`: `playNext`, `playPrevious`, `addToQueue`, `playNextInQueue`, `insertIntoQueue`, `removeFromQueue`, `toggleShuffle`.
-  - Ventaja práctica: muchas de estas operaciones hacen inserciones o eliminaciones al inicio/fin, o requieren remover un elemento en una posición concreta — operaciones donde `ChainBuffer` es adecuado.
-
-Referencias en el código
+Las operaciones que más se benefician de esto son `playNext` y `playPrevious`, porque avanzan o retroceden en la cola, y también acciones como `addToQueue`, `playNextInQueue`, `insertIntoQueue`, `removeFromQueue` y `toggleShuffle`, que modifican el orden de las canciones.
 
 - Implementación `ChainBuffer`: [src/ds/ChainBuffer.ts](src/ds/ChainBuffer.ts#L1)
 - Implementación `Deque` (array + head): [src/ds/Deque.ts](src/ds/Deque.ts#L1)
