@@ -44,9 +44,6 @@ export function Sidebar() {
     const dragCounterRef = useRef(0);
     const [isDraggingOver, setIsDraggingOver] = useState(false);
 
-    const progressPct = ingestion.total > 0
-        ? Math.round((ingestion.processed / ingestion.total) * 100)
-        : 0;
 
     const navItems = [
         { id: "songs" as const, label: "Songs", icon: <MusicNotes size={16} weight="bold" aria-hidden /> },
