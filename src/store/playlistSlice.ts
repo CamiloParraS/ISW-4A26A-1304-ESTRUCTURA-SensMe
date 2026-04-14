@@ -1,4 +1,5 @@
 import { savePlaylists } from "../persistence";
+import { PlaylistOrder } from "./playlistOrder";
 import type {
   Playlist,
   PlaylistId,
@@ -145,7 +146,13 @@ export function createPlaylistSlice<T extends PlaylistSliceState>(
 
           result = "added";
 
-          return withUpdatedTrackIds(playlist, [...playlist.trackIds, trackId]);
+          const orderedTrackIds = PlaylistOrder.fromTrackIds(playlist.trackIds);
+          orderedTrackIds.appendTrack(trackId);
+
+          return withUpdatedTrackIds(
+            playlist,
+            orderedTrackIds.snapshotTrackIds(),
+          );
         });
 
         savePlaylists(playlists);
@@ -162,9 +169,14 @@ export function createPlaylistSlice<T extends PlaylistSliceState>(
             return playlist;
           }
 
+          const orderedTrackIds = PlaylistOrder.fromTrackIds(playlist.trackIds);
+          if (!orderedTrackIds.removeTrack(trackId)) {
+            return playlist;
+          }
+
           return withUpdatedTrackIds(
             playlist,
-            playlist.trackIds.filter((id) => id !== trackId),
+            orderedTrackIds.snapshotTrackIds(),
           );
         });
 
@@ -185,14 +197,15 @@ export function createPlaylistSlice<T extends PlaylistSliceState>(
             return playlist;
           }
 
-          const nextTrackIds = [...playlist.trackIds];
-          const [movedTrackId] = nextTrackIds.splice(startIndex, 1);
-          if (!movedTrackId) {
+          const orderedTrackIds = PlaylistOrder.fromTrackIds(playlist.trackIds);
+          if (!orderedTrackIds.moveTrackByIndex(startIndex, endIndex)) {
             return playlist;
           }
 
-          nextTrackIds.splice(endIndex, 0, movedTrackId);
-          return withUpdatedTrackIds(playlist, nextTrackIds);
+          return withUpdatedTrackIds(
+            playlist,
+            orderedTrackIds.snapshotTrackIds(),
+          );
         });
 
         savePlaylists(playlists);
@@ -206,21 +219,16 @@ export function createPlaylistSlice<T extends PlaylistSliceState>(
             return playlist;
           }
 
-          const fromIdx = playlist.trackIds.indexOf(trackId);
-          if (fromIdx === -1) {
-            return playlist;
-          }
-
           const endIndex = clampIndex(toIdx, playlist.trackIds.length);
-          if (fromIdx === endIndex) {
+          const orderedTrackIds = PlaylistOrder.fromTrackIds(playlist.trackIds);
+          if (!orderedTrackIds.moveTrack(trackId, endIndex)) {
             return playlist;
           }
 
-          const nextTrackIds = [...playlist.trackIds];
-          nextTrackIds.splice(fromIdx, 1);
-          nextTrackIds.splice(endIndex, 0, trackId);
-
-          return withUpdatedTrackIds(playlist, nextTrackIds);
+          return withUpdatedTrackIds(
+            playlist,
+            orderedTrackIds.snapshotTrackIds(),
+          );
         });
 
         savePlaylists(playlists);

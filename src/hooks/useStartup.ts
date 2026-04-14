@@ -7,6 +7,7 @@ import {
   loadTheme,
 } from "../persistence";
 import { defaultQueueState, useStore } from "../store/index";
+import type { QueueState } from "../types";
 import { useToast } from "./useToast";
 
 export function useStartup() {
@@ -25,10 +26,10 @@ export function useStartup() {
     async function init() {
       setTheme(loadTheme());
       setPlaylists(loadPlaylists());
-      setQueueState(loadQueueState() ?? defaultQueueState);
 
       const serialized = loadSerializedTracks();
       if (serialized.length === 0) {
+        setQueueState(loadQueueState() ?? defaultQueueState);
         return;
       }
 
@@ -45,9 +46,34 @@ export function useStartup() {
       );
       setMissingSerializedTracks(missing);
 
+      // Restore persisted queue state only after library has been hydrated
+      // so that `usePlaybackEngine` can find the current track and start playback.
+      const persisted = loadQueueState();
+      if (persisted) {
+        const validIds = new Set(hydrated.map((t) => t.id));
+        const cleanse = (arr: string[]) => arr.filter((id) => validIds.has(id));
+
+        const cleaned: QueueState = {
+          ...persisted,
+          currentTrackId:
+            persisted.currentTrackId && validIds.has(persisted.currentTrackId)
+              ? persisted.currentTrackId
+              : null,
+          queue: cleanse(persisted.queue),
+          history: cleanse(persisted.history),
+          originalOrder: cleanse(persisted.originalOrder),
+        };
+
+        setQueueState(cleaned);
+      } else {
+        setQueueState(defaultQueueState);
+      }
+
       if (skipped > 0) {
         toast(
-          `${skipped} pista${skipped > 1 ? "s" : ""} ${skipped === 1 ? "no se pudo restaurar" : "no se pudieron restaurar"} (los archivos se movieron, se eliminaron o necesitan reautorización).`,
+          `${skipped} pista${skipped > 1 ? "s" : ""} ${
+            skipped === 1 ? "no se pudo restaurar" : "no se pudieron restaurar"
+          } (los archivos se movieron, se eliminaron o necesitan reautorización).`,
           "info",
         );
       }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { OpenFolderButton } from "../components/OpenFolderButton";
 import { OpenFileButton } from "../components/OpenFileButton";
 import { TrackRow } from "../components/TrackRow";
@@ -6,6 +7,7 @@ import { useStore } from "../store/index";
 import type { SortField } from "../types";
 import { searchTracks } from "../utils/search";
 import { sortTracks } from "../utils/sort";
+import { ClockCountdownIcon } from "@phosphor-icons/react/dist/ssr";
 
 const ROW_HEIGHT = 52;
 const OVERSCAN = 8;
@@ -102,12 +104,12 @@ export function SongsView() {
         );
     }
 
-    const columns: { field: SortField; label: string; width: string }[] = [
+    const columns: { field: SortField; label: ReactNode; width: string }[] = [
         { field: "title", label: "Título", width: "32%" },
         { field: "artist", label: "Artista", width: "21%" },
         { field: "album", label: "Álbum", width: "21%" },
         { field: "duration", label: "Tiempo", width: "11%" },
-        { field: "playCount", label: "Reproducciones", width: "9%" },
+        { field: "playCount", label: <ClockCountdownIcon size={16} aria-hidden />, width: "9%" },
     ];
 
     const visibleCount = Math.ceil(viewportHeight / ROW_HEIGHT) + OVERSCAN * 2;
@@ -156,7 +158,8 @@ export function SongsView() {
                                 <th
                                     key={column.field}
                                     style={{ width: column.width }}
-                                    className="sortable-header"
+                                    className={`sortable-header ${column.field === "playCount" ? "sortable-header--center" : ""}`}
+                                    aria-label={column.field === "playCount" ? "Reproducciones" : undefined}
                                     aria-sort={
                                         sortState.field === column.field
                                             ? sortState.dir === "asc"
@@ -166,12 +169,10 @@ export function SongsView() {
                                     }
                                     onClick={() => handleHeaderClick(column.field)}
                                 >
-                                    {column.label}
-                                    {sortState.field === column.field && (
-                                        <span aria-hidden>
-                                            {sortState.dir === "asc" ? " ^" : " v"}
-                                        </span>
-                                    )}
+                                    <span className="sort-label">{column.label}</span>
+                                    <span className="sort-indicator" aria-hidden>
+                                        {sortState.field === column.field ? (sortState.dir === "asc" ? "▲" : "▼") : null}
+                                    </span>
                                 </th>
                             ))}
                             <th style={{ width: "34px" }} />

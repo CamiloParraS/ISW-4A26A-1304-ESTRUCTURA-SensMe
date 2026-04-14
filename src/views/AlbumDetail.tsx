@@ -3,6 +3,7 @@ import { TrackRow } from "../components/TrackRow";
 import { useStore } from "../store/index";
 import type { Album, Track } from "../types";
 import { ArrowBendUpLeftIcon as ArrowBendLeftUpIcon } from "@phosphor-icons/react/dist/ssr";
+import { ClockCountdownIcon } from "@phosphor-icons/react/dist/ssr";
 
 interface AlbumDetailProps {
     album: Album;
@@ -65,7 +66,9 @@ export function AlbumDetail({ album, onBack, backLabel = "Álbumes" }: AlbumDeta
                             <th style={{ width: "50%" }}>Título</th>
                             <th style={{ width: "22%" }}>Artista</th>
                             <th style={{ width: "11%" }}>Tiempo</th>
-                            <th style={{ width: "11%" }}>Reproducciones</th>
+                            <th style={{ width: "11%" }} aria-label="Reproducciones">
+                                <ClockCountdownIcon size={16} aria-hidden />
+                            </th>
                             <th style={{ width: "34px" }} />
                         </tr>
                     </thead>

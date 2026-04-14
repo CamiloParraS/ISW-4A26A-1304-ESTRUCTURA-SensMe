@@ -138,7 +138,10 @@ export function PlaybackBar() {
                             }
                         }}
                         aria-label={state.isPlaying ? "Pausar" : "Reproducir"}
-                        className="transport-button transport-button--primary"
+                        className={`transport-button transport-button--primary ${!track ? "utility-button--disabled" : ""}`}
+                        disabled={!track}
+                        aria-disabled={!track}
+                        title={!track ? "No hay pista seleccionada" : undefined}
                     >
                         {state.isPlaying ? <Pause aria-hidden /> : <Play aria-hidden />}
                         <span className="sr-only">{state.isPlaying ? "Pausar" : "Reproducir"}</span>
