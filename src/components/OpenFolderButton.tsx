@@ -1,7 +1,6 @@
 import { ingestFolder } from "../ingestion/ingest";
 import { useToast } from "../hooks/useToast";
 import { useStore } from "../store/index";
-import { Button } from "./ui/button";
 
 type DirectoryPickerWindow = Window & {
     showDirectoryPicker?: (options?: {
@@ -50,32 +49,16 @@ export function OpenFolderButton() {
         }
     }
 
-    const progressPct = ingestion.total > 0
-        ? Math.round((ingestion.processed / ingestion.total) * 100)
-        : 0;
-
     return (
-        <div className="open-folder-wrap">
-            <Button
-                variant="outline"
-                size="sm"
+        <div>
+            <button
                 type="button"
                 className="open-folder-btn"
                 onClick={handleClick}
                 disabled={ingestion.isImporting}
             >
                 {ingestion.isImporting ? "Importing..." : "Open Folder"}
-            </Button>
-            {ingestion.isImporting && ingestion.total > 0 && (
-                <div className="ingestion-progress" role="progressbar" aria-valuemin={0} aria-valuemax={ingestion.total} aria-valuenow={ingestion.processed}>
-                    <div className="ingestion-progress-fill" style={{ width: `${progressPct}%` }} />
-                </div>
-            )}
-            <p className="open-folder-status">
-                {ingestion.total > 0
-                    ? `${ingestion.processed} / ${ingestion.total} files processed`
-                    : ""}
-            </p>
+            </button>
         </div>
     );
 }

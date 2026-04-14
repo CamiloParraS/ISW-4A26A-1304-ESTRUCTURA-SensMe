@@ -1,5 +1,6 @@
 import { type ReactNode, useMemo, useState } from "react";
 import { OpenFolderButton } from "../components/OpenFolderButton";
+import { OpenFileButton } from "../components/OpenFileButton";
 import { PlaylistArtMosaic } from "../components/PlaylistArtMosaic";
 import { useStore } from "../store/index";
 import type { Album, Playlist } from "../types";
@@ -88,6 +89,7 @@ export function LibraryView() {
                     <p>Import music to populate albums and artists, or create a playlist to get started.</p>
                     <div className="library-empty-actions">
                         <OpenFolderButton />
+                        <OpenFileButton />
                         <button
                             type="button"
                             className="open-folder-btn"

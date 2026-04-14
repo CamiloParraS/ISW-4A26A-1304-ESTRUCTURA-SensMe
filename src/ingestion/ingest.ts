@@ -88,3 +88,64 @@ export async function ingestFolder(
     errors,
   };
 }
+
+export async function ingestFile(
+  handleOrFile: FileSystemFileHandle | File,
+  existingPaths: Set<string>,
+  callbacks: IngestCallbacks,
+): Promise<ImportResult> {
+  const fileName = (handleOrFile as any).name ?? "unknown";
+
+  if (existingPaths.has(fileName)) {
+    callbacks.onTotal(0);
+    return { imported: 0, errors: [] };
+  }
+
+  callbacks.onTotal(1);
+
+  const errors: ImportError[] = [];
+
+  try {
+    const file: File =
+      typeof (handleOrFile as any).getFile === "function"
+        ? await (handleOrFile as FileSystemFileHandle).getFile()
+        : (handleOrFile as File);
+
+    const raw = await parseMetadata(file);
+
+    let mb: MBResult | null = null;
+    if ((!raw.coverArt || !raw.year) && raw.artist && raw.album) {
+      mb = await fetchMusicBrainzData(raw.artist, raw.title ?? "", raw.album);
+    }
+
+    // Ensure we pass a FileSystemFileHandle-like object into buildTrack so
+    // downstream code can call `getFile()` on the handle. When we only have
+    // a plain File (from drag/drop), wrap it with a minimal handle shim.
+    const handleArg: FileSystemFileHandle =
+      typeof (handleOrFile as any).getFile === "function"
+        ? (handleOrFile as FileSystemFileHandle)
+        : ({
+            getFile: async () => file,
+            name: file.name,
+          } as unknown as FileSystemFileHandle);
+
+    const track = buildTrack(
+      handleArg,
+      fileName,
+      raw,
+      mb,
+      mb?.coverArtUrl ?? null,
+    );
+
+    callbacks.onBatch([track]);
+    callbacks.onProgress(1);
+
+    return { imported: 1, errors };
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "Unknown error";
+    errors.push({ fileName, reason });
+    callbacks.onError({ fileName, reason });
+    callbacks.onProgress(1);
+    return { imported: 0, errors };
+  }
+}

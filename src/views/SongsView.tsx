@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { OpenFolderButton } from "../components/OpenFolderButton";
+import { OpenFileButton } from "../components/OpenFileButton";
 import { TrackRow } from "../components/TrackRow";
 import { useStore } from "../store/index";
 import type { SortField } from "../types";
@@ -17,7 +18,6 @@ export function SongsView() {
     const setSortState = useStore((state) => state.setSortState);
     const query = useStore((state) => state.libraryQuery);
     const setLibraryQuery = useStore((state) => state.setLibraryQuery);
-    const ingestion = useStore((state) => state.ingestionProgress);
 
     const [debouncedQuery, setDebouncedQuery] = useState(query);
     const [scrollTop, setScrollTop] = useState(0);
@@ -96,11 +96,7 @@ export function SongsView() {
                     <h1>Your library is empty</h1>
                     <p>Open a folder to scan tracks, album art, and metadata.</p>
                     <OpenFolderButton />
-                    {ingestion.isImporting && (
-                        <p className="text-muted">
-                            Importing {ingestion.processed} / {ingestion.total} files...
-                        </p>
-                    )}
+                    <OpenFileButton />
                 </div>
             </section>
         );

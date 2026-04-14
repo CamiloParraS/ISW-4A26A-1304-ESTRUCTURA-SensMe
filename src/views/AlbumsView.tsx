@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { OpenFolderButton } from "../components/OpenFolderButton";
+import { OpenFileButton } from "../components/OpenFileButton";
 import { useStore } from "../store/index";
 import type { Album } from "../types";
 import { AlbumDetail } from "./AlbumDetail";
@@ -41,6 +42,7 @@ export function AlbumsView() {
                     <h2>No albums yet</h2>
                     <p>Import a folder to build your album collection.</p>
                     <OpenFolderButton />
+                    <OpenFileButton />
                 </div>
             ) : (
                 <div className="albums-grid">

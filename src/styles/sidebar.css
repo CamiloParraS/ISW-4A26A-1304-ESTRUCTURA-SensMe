@@ -125,11 +125,13 @@
 .sidebar-footer {
   margin-top: 16px;
   display: block;
+  gap: 5px;
   padding-bottom: 20px;
 }
 
 .new-playlist-btn {
   margin-top: 10px;
+  margin-bottom: 10px;
   min-height: 34px;
   width: 100%;
   border: 1px solid var(--border);
@@ -147,6 +149,37 @@
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.sidebar-footer {
+  border-top: 1px solid var(--border);
+}
+
+.footer-actions {
+  justify-content: space-around;
+}
+
+.sidebar-footer .footer-actions .open-folder-btn,
+.sidebar-footer .footer-actions .add-music-btn {
+  width: 100%;
+  min-width: 0;
+  justify-content: center;
+}
+
+.footer-status {
+  margin-top: 8px;
+}
+
+.footer-ingestion-status {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.footer-drop-over {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  border-radius: 8px;
+  padding: 6px;
 }
 
 .add-music-btn {
@@ -181,6 +214,7 @@
 }
 
 .open-folder-btn {
+  font-size: 0.8rem;
   width: 100%;
   justify-content: center;
 }

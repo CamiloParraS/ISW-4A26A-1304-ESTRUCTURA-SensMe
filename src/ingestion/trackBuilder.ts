@@ -8,7 +8,7 @@ function fileNameWithoutExt(path: string): string {
 }
 
 export function buildTrack(
-  handle: FileSystemFileHandle,
+  handle: FileSystemFileHandle | File,
   filePath: string,
   raw: RawMetadata,
   mb: MBResult | null,
@@ -26,9 +26,21 @@ export function buildTrack(
     coverArtUrl = existingCoverArtUrl;
   }
 
+  // If we were handed a plain File (e.g. from drag/drop), wrap it with a
+  // minimal FileSystemFileHandle-like shim so the rest of the app can call
+  // `getFile()` and the `Track.fileHandle` remains typed as
+  // `FileSystemFileHandle`.
+  const fileHandle: FileSystemFileHandle =
+    typeof (handle as any).getFile === "function"
+      ? (handle as FileSystemFileHandle)
+      : ({
+          getFile: async () => handle as File,
+          name: (handle as File).name,
+        } as unknown as FileSystemFileHandle);
+
   return {
     id: crypto.randomUUID(),
-    fileHandle: handle,
+    fileHandle,
     filePath,
     title: raw.title || fileNameWithoutExt(filePath),
     artist,
