@@ -1,73 +1,23 @@
-# React + TypeScript + Vite
+# Doubly Linked List (ChainBuffer)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Resumen
 
-Currently, two official plugins are available:
+- En este proyecto se utiliza una estructura de lista doblemente enlazada llamada `ChainBuffer` para operaciones de cola y manipulación eficiente de la lista de reproducción.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Implementación en este repo
 
-## React Compiler
+- La implementación está en [src/ds/ChainBuffer.ts](src/ds/ChainBuffer.ts#L1).
+  - Tipos clave: `ChainCell<T>` (nodo con `item`, `before`, `after`).
+  - Métodos principales: `addStart`, `addEnd`, `addAt`, `takeStart`, `takeEnd`, `takeAt`, `detachCell`, `exportItems`, `loadItems`, `readStart`, `readEnd`, `getCount`, `isEmpty`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Dónde se utiliza en la aplicación
 
-## Expanding the ESLint configuration
+- El slice de la cola (`queueSlice`) convierte la cola actual en un `ChainBuffer` cuando necesita hacer operaciones mutables y luego exporta el resultado como arreglo: [src/store/queueSlice.ts](src/store/queueSlice.ts#L1).
+  - Ejemplos de uso en `queueSlice`: `playNext`, `playPrevious`, `addToQueue`, `playNextInQueue`, `insertIntoQueue`, `removeFromQueue`, `toggleShuffle`.
+  - Ventaja práctica: muchas de estas operaciones hacen inserciones o eliminaciones al inicio/fin, o requieren remover un elemento en una posición concreta — operaciones donde `ChainBuffer` es adecuado.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Referencias en el código
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Implementación `ChainBuffer`: [src/ds/ChainBuffer.ts](src/ds/ChainBuffer.ts#L1)
+- Implementación `Deque` (array + head): [src/ds/Deque.ts](src/ds/Deque.ts#L1)
+- Uso en el slice de cola: [src/store/queueSlice.ts](src/store/queueSlice.ts#L1)
