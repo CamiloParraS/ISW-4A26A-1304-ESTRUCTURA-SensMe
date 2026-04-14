@@ -1,3 +1,9 @@
+/* original combined file replaced by imports */
+@import "./layout.css";
+@import "./sidebar.css";
+@import "./library.css";
+@import "./playback.css";
+@import "./overlays.css";
 .shell {
   display: grid;
   grid-template-columns: 240px 1fr;
@@ -19,7 +25,9 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding-bottom: 80px;
+  /* padding for the playback bar should be applied to the scrollable
+     area (.sidebar-playlists) so the sidebar container doesn't create
+     extra page-height/overflow. */
 }
 
 .sidebar-top {
@@ -119,6 +127,7 @@
 .sidebar-footer {
   margin-top: 16px;
   display: block;
+  padding-bottom: 72px;
 }
 
 .sidebar-footer .footer-actions {
@@ -294,8 +303,11 @@
 
 .track-table tbody td {
   padding: 10px;
-  border-bottom: 1px solid var(--border);
-  height: 52px;
+  height: 51px;
+}
+
+.track-row {
+  border: 1px solid var(--border);
 }
 
 .sortable-header {
@@ -472,6 +484,8 @@
   min-height: 34px;
   padding: 0 14px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
 }
 
 .play-btn {

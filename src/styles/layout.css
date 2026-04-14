@@ -1,0 +1,67 @@
+.shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 1fr 72px;
+  grid-template-areas:
+    "sidebar main"
+    "playbar playbar";
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text-primary);
+}
+
+.main-content {
+  grid-area: main;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.view-header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.track-count {
+  margin: 3px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.search-input {
+  min-width: 260px;
+  max-width: 440px;
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.search-input:focus {
+  outline: 2px solid color-mix(in srgb, var(--accent) 44%, transparent);
+  outline-offset: 1px;
+}
+
+@media (max-width: 980px) {
+  .shell {
+    grid-template-columns: 84px 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .main-content {
+    padding: 14px;
+  }
+}
