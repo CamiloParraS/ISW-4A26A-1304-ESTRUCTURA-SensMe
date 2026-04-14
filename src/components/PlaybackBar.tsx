@@ -10,7 +10,7 @@ import {
     SkipForwardIcon as SkipForward,
 } from "@phosphor-icons/react";
 import { usePlaybackEngine } from "../hooks/usePlaybackEngine";
-import { useStore } from "../store";
+import { useStore } from "../store/index";
 import { extractAccentColor } from "../utils/accentColor";
 
 function formatTime(seconds: number): string {

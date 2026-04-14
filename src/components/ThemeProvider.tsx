@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from "react";
-import { useStore } from "../store";
+import { useStore } from "../store/index";
 
 interface ThemeProviderProps {
     children: ReactNode;

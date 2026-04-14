@@ -1,6 +1,6 @@
 import { ingestFolder } from "../ingestion/ingest";
 import { useToast } from "../hooks/useToast";
-import { useStore } from "../store";
+import { useStore } from "../store/index";
 import { Button } from "./ui/button";
 
 type DirectoryPickerWindow = Window & {

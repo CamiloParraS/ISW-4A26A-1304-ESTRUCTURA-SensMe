@@ -1,9 +1,10 @@
 import { useState, type MouseEvent } from "react";
-import { useStore } from "../store";
+import { useDraggable } from "@dnd-kit/core";
+import { useStore } from "../store/index";
 import type { Track } from "../types";
 import { formatDuration } from "../utils/format";
 import { ContextMenu } from "./ContextMenu";
-import { WaveformIcon } from "@phosphor-icons/react";
+import { DotsThreeOutlineVerticalIcon, WaveformIcon } from "@phosphor-icons/react";
 
 interface TrackRowProps {
     track: Track;
@@ -16,21 +17,47 @@ export function TrackRow({ track, index, onDoubleClick, showAlbum = true }: Trac
     const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
     const currentTrackId = useStore((state) => state.queueState.currentTrackId);
     const isPlaying = track.id === currentTrackId;
+    const titleMaxWidth = showAlbum ? "30ch" : "24ch";
+    const artistMaxWidth = showAlbum ? "24ch" : "18ch";
+    const albumMaxWidth = "24ch";
+    const durationMaxWidth = "7ch";
+    const playCountMaxWidth = "6ch";
+    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+        id: track.id,
+        data: {
+            type: "library-track",
+            trackId: track.id,
+        },
+    });
 
     function handleContextMenu(event: MouseEvent<HTMLTableRowElement>) {
         event.preventDefault();
         setMenuPosition({ x: event.clientX, y: event.clientY });
     }
 
+    function handleMenuButtonClick(event: MouseEvent<HTMLButtonElement>) {
+        event.preventDefault();
+        event.stopPropagation();
+        const bounds = event.currentTarget.getBoundingClientRect();
+        setMenuPosition({ x: bounds.right, y: bounds.bottom + 4 });
+    }
+
     return (
         <>
             <tr
-                className={`track-row ${isPlaying ? "track-row--playing" : ""}`}
+                ref={setNodeRef}
+                className={`track-row ${isPlaying ? "track-row--playing" : ""} ${menuPosition ? "track-row--menu-open" : ""}`}
+                style={isDragging ? { opacity: 0.55 } : undefined}
                 onDoubleClick={onDoubleClick}
                 onContextMenu={handleContextMenu}
                 aria-selected={isPlaying}
             >
-                <td className="track-index">
+                <td
+                    className="track-index drag-source-cell"
+                    {...attributes}
+                    {...listeners}
+                    aria-label={`Drag ${track.title} to a playlist`}
+                >
                     {isPlaying ? (
                         <>
                             <WaveformIcon size={16} weight="bold" aria-hidden />
@@ -48,7 +75,7 @@ export function TrackRow({ track, index, onDoubleClick, showAlbum = true }: Trac
                         title={track.title}
                         style={{
                             display: "inline-block",
-                            maxWidth: 250,
+                            maxWidth: titleMaxWidth,
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -65,7 +92,7 @@ export function TrackRow({ track, index, onDoubleClick, showAlbum = true }: Trac
                         title={track.artist}
                         style={{
                             display: "inline-block",
-                            maxWidth: 180,
+                            maxWidth: artistMaxWidth,
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -83,7 +110,7 @@ export function TrackRow({ track, index, onDoubleClick, showAlbum = true }: Trac
                             title={track.album}
                             style={{
                                 display: "inline-block",
-                                maxWidth: 180,
+                                maxWidth: albumMaxWidth,
                                 whiteSpace: "nowrap",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
@@ -101,7 +128,7 @@ export function TrackRow({ track, index, onDoubleClick, showAlbum = true }: Trac
                         title={formatDuration(track.duration)}
                         style={{
                             display: "inline-block",
-                            maxWidth: 100,
+                            maxWidth: durationMaxWidth,
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -118,7 +145,7 @@ export function TrackRow({ track, index, onDoubleClick, showAlbum = true }: Trac
                         title={String(track.playCount)}
                         style={{
                             display: "inline-block",
-                            maxWidth: 80,
+                            maxWidth: playCountMaxWidth,
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -127,6 +154,20 @@ export function TrackRow({ track, index, onDoubleClick, showAlbum = true }: Trac
                     >
                         {track.playCount}
                     </span>
+                </td>
+                <td className="track-row-action-cell">
+                    <button
+                        type="button"
+                        className="track-row-menu-btn"
+                        aria-label={`Open actions for ${track.title}`}
+                        aria-haspopup="menu"
+                        aria-expanded={Boolean(menuPosition)}
+                        onPointerDown={(event) => event.stopPropagation()}
+                        onClick={handleMenuButtonClick}
+                    >
+                        <DotsThreeOutlineVerticalIcon size={16} weight="bold" aria-hidden />
+                        <span className="sr-only">More actions</span>
+                    </button>
                 </td>
             </tr>
             {menuPosition && (

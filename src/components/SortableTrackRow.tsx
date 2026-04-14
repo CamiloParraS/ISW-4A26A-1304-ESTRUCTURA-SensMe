@@ -2,7 +2,7 @@ import { DotsThreeOutlineVerticalIcon, WaveformIcon } from "@phosphor-icons/reac
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useState, type CSSProperties, type MouseEvent } from "react";
-import { useStore } from "../store";
+import { useStore } from "../store/index";
 import type { PlaylistId, Track } from "../types";
 import { formatDuration } from "../utils/format";
 import { ContextMenu } from "./ContextMenu";

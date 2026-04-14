@@ -1,7 +1,9 @@
 import { Moon, Sun, Book, List } from "@phosphor-icons/react";
+import { useDroppable } from "@dnd-kit/core";
 import { OpenFolderButton } from "./OpenFolderButton";
-import { useStore } from "../store";
-import type { Theme } from "../types";
+import { PlaylistArtMosaic } from "./PlaylistArtMosaic";
+import { useStore } from "../store/index";
+import type { Playlist, Theme } from "../types";
 
 function getResolvedTheme(theme: Theme): "light" | "dark" {
     if (theme === "system") {
@@ -25,6 +27,7 @@ export function Sidebar() {
     const playlists = useStore((state) => state.playlists);
     const activePlaylistId = useStore((state) => state.activePlaylistId);
     const setActivePlaylist = useStore((state) => state.setActivePlaylistId);
+    const openCreatePlaylistModal = useStore((state) => state.openCreatePlaylistModal);
     const theme = useStore((state) => state.theme);
     const setTheme = useStore((state) => state.setTheme);
     const resolvedTheme = getResolvedTheme(theme);
@@ -73,30 +76,64 @@ export function Sidebar() {
             <div className="sidebar-section-label">Playlists</div>
             <ul className="sidebar-playlists">
                 {playlists.map((playlist) => (
-                    <li key={playlist.id}>
-                        <button
-                            type="button"
-                            className={`nav-item ${view === "playlist" && activePlaylistId === playlist.id
-                                ? "nav-item--active"
-                                : ""
-                                }`}
-                            onClick={() => {
-                                setView("playlist");
-                                setActivePlaylist(playlist.id);
-                            }}
-                        >
-                            <span className="nav-label">{playlist.name}</span>
-                        </button>
-                    </li>
+                    <DroppablePlaylistItem
+                        key={playlist.id}
+                        playlist={playlist}
+                        isActive={view === "playlist" && activePlaylistId === playlist.id}
+                        onOpen={() => {
+                            setView("playlist");
+                            setActivePlaylist(playlist.id);
+                        }}
+                    />
                 ))}
                 {playlists.length === 0 && (
                     <li className="sidebar-empty">No playlists yet</li>
                 )}
             </ul>
+            <button
+                type="button"
+                className="new-playlist-btn"
+                onClick={() => openCreatePlaylistModal()}
+            >
+                + New Playlist
+            </button>
 
             <div className="sidebar-footer">
                 <OpenFolderButton />
             </div>
         </nav>
+    );
+}
+
+function DroppablePlaylistItem({
+    playlist,
+    isActive,
+    onOpen,
+}: {
+    playlist: Playlist;
+    isActive: boolean;
+    onOpen: () => void;
+}) {
+    const { setNodeRef, isOver } = useDroppable({
+        id: `playlist::${playlist.id}`,
+        data: {
+            type: "playlist-drop",
+            playlistId: playlist.id,
+        },
+    });
+
+    return (
+        <li ref={setNodeRef}>
+            <button
+                type="button"
+                className={`nav-item ${isActive ? "nav-item--active" : ""} ${isOver ? "nav-item--drop-target" : ""}`}
+                onClick={onOpen}
+            >
+                <span className="sidebar-playlist-art" aria-hidden>
+                    <PlaylistArtMosaic trackIds={playlist.trackIds.slice(0, 4)} />
+                </span>
+                <span className="nav-label">{playlist.name}</span>
+            </button>
+        </li>
     );
 }

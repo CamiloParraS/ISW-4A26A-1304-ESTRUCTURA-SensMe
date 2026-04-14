@@ -1,7 +1,8 @@
-import { useStore } from "../store";
+import { useStore } from "../store/index";
+import type { TrackId } from "../types";
 
 interface PlaylistArtMosaicProps {
-    trackIds: string[];
+    trackIds: TrackId[];
 }
 
 export function PlaylistArtMosaic({ trackIds }: PlaylistArtMosaicProps) {

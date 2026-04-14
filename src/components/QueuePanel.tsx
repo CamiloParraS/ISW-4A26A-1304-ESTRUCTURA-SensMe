@@ -1,4 +1,4 @@
-import { useStore } from "../store";
+import { useStore } from "../store/index";
 import type { Track } from "../types";
 
 export function QueuePanel() {
@@ -7,6 +7,8 @@ export function QueuePanel() {
     const queueState = useStore((state) => state.queueState);
     const library = useStore((state) => state.library);
     const startQueue = useStore((state) => state.startQueue);
+    const removeFromQueue = useStore((state) => state.removeFromQueue);
+    const insertIntoQueue = useStore((state) => state.insertIntoQueue);
 
     const queuedTracks = queueState.queue
         .map((id) => library.get(id))
@@ -37,6 +39,7 @@ export function QueuePanel() {
                     </button>
                 </div>
 
+                {/* {/* } */}
                 <section>
                     <h3>Now Playing</h3>
                     {nowPlaying ? (
@@ -46,7 +49,6 @@ export function QueuePanel() {
                             ) : (
                                 <div className="queue-cover-placeholder" aria-hidden />
                             )}
-                            {/* Matches the flat structure */}
                             <span>{nowPlaying.title}</span>
                             <span className="muted">{nowPlaying.artist}</span>
                         </div>
@@ -55,6 +57,7 @@ export function QueuePanel() {
                     )}
                 </section>
 
+                {/* ── Next Up ─────────────────────────────────────────────────── */}
                 <section>
                     <h3>Next Up ({queuedTracks.length})</h3>
                     <ul className="queue-list">
@@ -63,6 +66,9 @@ export function QueuePanel() {
                                 key={`${track.id}-${index}`}
                                 className="queue-item"
                                 onDoubleClick={() => {
+                                    // Double-click to jump: rebuild the queue starting at this item.
+                                    // We include the currently playing track at position 0 so history
+                                    // is preserved correctly by startQueue.
                                     const currentAndQueue = queueState.currentTrackId
                                         ? [queueState.currentTrackId, ...queueState.queue]
                                         : [...queueState.queue];
@@ -76,11 +82,44 @@ export function QueuePanel() {
                                     <div className="queue-cover-placeholder" aria-hidden />
                                 )}
 
-                                {/* Removed 'queue-meta' div to match Now Playing structure */}
-                                <span>
-                                    {track.title}
-                                </span>
+                                <span>{track.title}</span>
                                 <span className="muted">{track.artist}</span>
+
+                                {/* ── Per-item queue actions ───────────────────── */}
+                                <div className="queue-item-actions">
+                                    {/* Move to top: O(1) front insert via insertIntoQueue(id, 0) */}
+                                    {index > 0 && (
+                                        <button
+                                            type="button"
+                                            className="queue-action-btn"
+                                            aria-label={`Play ${track.title} next`}
+                                            title="Play next"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                // Remove from its current position first, then
+                                                // re-insert at the very front to keep queue behavior consistent.
+                                                removeFromQueue(index);
+                                                insertIntoQueue(track.id, 0);
+                                            }}
+                                        >
+                                            ↑
+                                        </button>
+                                    )}
+
+                                    {/* Remove from queue: O(n) positional remove */}
+                                    <button
+                                        type="button"
+                                        className="queue-action-btn queue-action-btn--remove"
+                                        aria-label={`Remove ${track.title} from queue`}
+                                        title="Remove from queue"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            removeFromQueue(index);
+                                        }}
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
                             </li>
                         ))}
                     </ul>
