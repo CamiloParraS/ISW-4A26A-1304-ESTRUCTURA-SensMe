@@ -14,6 +14,9 @@ export function useStartup() {
   const setTheme = useStore((state) => state.setTheme);
   const setPlaylists = useStore((state) => state.setPlaylists);
   const setQueueState = useStore((state) => state.setQueueState);
+  const setMissingSerializedTracks = useStore(
+    (state) => state.setMissingSerializedTracks,
+  );
   const { toast } = useToast();
 
   useEffect(() => {
@@ -37,9 +40,14 @@ export function useStartup() {
       const skipped = serialized.length - hydrated.length;
       addTracks(hydrated);
 
+      const missing = serialized.filter(
+        (s) => !hydrated.find((h) => h.id === s.id),
+      );
+      setMissingSerializedTracks(missing);
+
       if (skipped > 0) {
         toast(
-          `${skipped} pista${skipped > 1 ? "s" : ""} ${skipped === 1 ? "no se pudo restaurar" : "no se pudieron restaurar"} (los archivos se movieron o se eliminaron).`,
+          `${skipped} pista${skipped > 1 ? "s" : ""} ${skipped === 1 ? "no se pudo restaurar" : "no se pudieron restaurar"} (los archivos se movieron, se eliminaron o necesitan reautorización).`,
           "info",
         );
       }

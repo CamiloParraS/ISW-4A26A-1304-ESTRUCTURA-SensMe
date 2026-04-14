@@ -87,6 +87,9 @@ export async function hydrateLibrary(
     }) => Promise<"granted" | "denied" | "prompt">;
   };
 
+  // During startup we must NOT prompt the user for permissions. Only query
+  // what's already granted and load those tracks. Requesting permissions
+  // (which triggers a prompt) must be done from a user gesture.
   const hydrated = await Promise.all(
     serialized.map(async (track) => {
       try {
@@ -100,13 +103,10 @@ export async function hydrateLibrary(
         const queryPermission = await permissionHandle.queryPermission({
           mode: "read",
         });
+
+        // If permission hasn't already been granted, skip the track for now.
         if (queryPermission !== "granted") {
-          const requestPermission = await permissionHandle.requestPermission({
-            mode: "read",
-          });
-          if (requestPermission !== "granted") {
-            return null;
-          }
+          return null;
         }
 
         let file: File;
@@ -148,6 +148,87 @@ export async function hydrateLibrary(
   );
 
   return hydrated.filter((track): track is Track => track !== null);
+}
+
+export async function requestPermissionsForSerializedTracks(
+  serialized: SerializedTrack[],
+  onProgress?: (restored: number, total: number) => void,
+): Promise<Track[]> {
+  type PermissionHandle = FileSystemFileHandle & {
+    getFile: () => Promise<File>;
+    queryPermission: (descriptor: {
+      mode: "read" | "readwrite";
+    }) => Promise<"granted" | "denied" | "prompt">;
+    requestPermission: (descriptor: {
+      mode: "read" | "readwrite";
+    }) => Promise<"granted" | "denied" | "prompt">;
+  };
+
+  const restored: Track[] = [];
+  let restoredCount = 0;
+
+  for (const track of serialized) {
+    try {
+      const handle = await loadHandle(track.id);
+      if (!handle) continue;
+
+      const permissionHandle = handle as PermissionHandle;
+      const queryPermission = await permissionHandle.queryPermission({
+        mode: "read",
+      });
+
+      // If not already granted, now request permission. This function is
+      // intended to be called from a user gesture so the browser will show
+      // the permission prompt.
+      if (queryPermission !== "granted") {
+        const requestPermission = await permissionHandle.requestPermission({
+          mode: "read",
+        });
+        if (requestPermission !== "granted") {
+          continue;
+        }
+      }
+
+      let file: File;
+
+      try {
+        file = await permissionHandle.getFile();
+      } catch {
+        continue;
+      }
+
+      let coverArtUrl = track.coverArtUrl;
+
+      if (coverArtUrl?.startsWith("blob:")) {
+        try {
+          const raw = await parseMetadata(file);
+
+          if (raw.coverArt) {
+            coverArtUrl = URL.createObjectURL(raw.coverArt);
+          } else {
+            coverArtUrl = null;
+          }
+        } catch {
+          coverArtUrl = null;
+        }
+      }
+
+      restored.push({
+        ...track,
+        coverArtUrl,
+        fileHandle: handle,
+        playCount: track.playCount ?? 0,
+        lastPlayed: track.lastPlayed ?? null,
+      });
+
+      restoredCount += 1;
+      if (onProgress) onProgress(restoredCount, serialized.length);
+    } catch {
+      // ignore individual failures and continue
+    }
+  }
+
+  return restored;
 }
 
 export function savePlaylists(playlists: Playlist[]): void {

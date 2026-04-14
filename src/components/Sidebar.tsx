@@ -1,5 +1,5 @@
 import { Moon, Sun, Book, List, MusicNotes } from "@phosphor-icons/react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { OpenFolderButton } from "./OpenFolderButton";
 import { OpenFileButton } from "./OpenFileButton";
@@ -7,6 +7,8 @@ import { PlaylistArtMosaic } from "./PlaylistArtMosaic";
 import { useStore } from "../store/index";
 import { ingestFile } from "../ingestion/ingest";
 import { useToast } from "../hooks/useToast";
+import { requestPermissionsForSerializedTracks } from "../persistence";
+import { toast as sonnerToast } from "sonner";
 import type { Playlist, Theme } from "../types";
 
 function getResolvedTheme(theme: Theme): "light" | "dark" {
@@ -39,7 +41,48 @@ export function Sidebar() {
     const addTracks = useStore((state) => state.addTracks);
     const existingPaths = useStore((state) => state.existingPaths);
     const setIngestionProgress = useStore((state) => state.setIngestionProgress);
+    const missingSerializedTracks = useStore((state) => state.missingSerializedTracks);
+    const setMissingSerializedTracks = useStore((state) => state.setMissingSerializedTracks);
     const { toast } = useToast();
+
+    const lastRestoreKeyRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        if (missingSerializedTracks.length === 0) return;
+
+        const key = missingSerializedTracks.map((s) => s.id).sort().join(",");
+        if (lastRestoreKeyRef.current === key) return;
+        lastRestoreKeyRef.current = key;
+
+        sonnerToast("Algunas pistas requieren reautorización.", {
+            action: {
+                label: "Restaurar biblioteca",
+                async onClick() {
+                    try {
+                        setIngestionProgress({ isImporting: true, processed: 0, total: missingSerializedTracks.length });
+
+                        const restored = await requestPermissionsForSerializedTracks(missingSerializedTracks, (restoredCount) => {
+                            setIngestionProgress({ processed: restoredCount });
+                        });
+
+                        setIngestionProgress({ isImporting: false });
+
+                        if (restored.length > 0) {
+                            addTracks(restored);
+                            const remaining = missingSerializedTracks.filter((s) => !restored.find((r) => r.id === s.id));
+                            setMissingSerializedTracks(remaining);
+                            sonnerToast.success(`${restored.length} pista${restored.length > 1 ? "s" : ""} restaurada${restored.length > 1 ? "s" : ""}.`);
+                        } else {
+                            sonnerToast("No se restauraron pistas.");
+                        }
+                    } catch (err) {
+                        setIngestionProgress({ isImporting: false });
+                        sonnerToast.error("Error al restaurar la biblioteca.");
+                    }
+                },
+            },
+        });
+    }, [missingSerializedTracks, addTracks, setIngestionProgress, setMissingSerializedTracks]);
 
     const dragCounterRef = useRef(0);
     const [isDraggingOver, setIsDraggingOver] = useState(false);

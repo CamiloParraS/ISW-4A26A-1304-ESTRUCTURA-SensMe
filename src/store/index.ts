@@ -13,6 +13,7 @@ import type {
   Theme,
   Track,
   TrackId,
+  SerializedTrack,
 } from "../types";
 import {
   createPlaylistSlice,
@@ -52,6 +53,8 @@ interface UISlice {
   persistError: Exclude<PersistResult, "ok"> | null;
   isQueueOpen: boolean;
   playlistModal: PlaylistModalState | null;
+  missingSerializedTracks: SerializedTrack[];
+  setMissingSerializedTracks: (tracks: SerializedTrack[]) => void;
   setTheme: (theme: Theme) => void;
   setActiveView: (view: UISlice["activeView"]) => void;
   setActivePlaylistId: (playlistId: PlaylistId | null) => void;
@@ -224,6 +227,7 @@ export const useStore = create<Store>((set, get) => ({
     processed: 0,
     total: 0,
   },
+  missingSerializedTracks: [],
   persistError: null,
   isQueueOpen: false,
   playlistModal: null,
@@ -243,6 +247,8 @@ export const useStore = create<Store>((set, get) => ({
         ...patch,
       },
     })),
+  setMissingSerializedTracks: (tracks) =>
+    set({ missingSerializedTracks: tracks }),
   clearPersistError: () => set({ persistError: null }),
   setQueueOpen: (isQueueOpen) => set({ isQueueOpen }),
   openCreatePlaylistModal: (trackId) =>
