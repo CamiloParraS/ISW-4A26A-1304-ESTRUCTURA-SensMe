@@ -22,7 +22,7 @@ export function OpenFileButton() {
         const pickerWindow = window as FilePickerWindow;
 
         if (!pickerWindow.showOpenFilePicker) {
-            toast("File picking is not supported in this browser.", "error");
+            toast("La selección de archivos no es compatible en este navegador.", "error");
             return;
         }
 
@@ -33,7 +33,7 @@ export function OpenFileButton() {
                 multiple: false,
                 types: [
                     {
-                        description: "Audio files",
+                        description: "Archivos de audio",
                         accept: {
                             "audio/*": [".mp3", ".flac", ".wav", ".m4a", ".ogg", ".aac"],
                         },
@@ -57,7 +57,7 @@ export function OpenFileButton() {
         try {
             await ingestFile(handle, existingPaths, {
                 onBatch: (tracks) => addTracks(tracks),
-                onError: (error) => toast(`Could not read "${error.fileName}"`, "error"),
+                onError: (error) => toast(`No se pudo leer "${error.fileName}"`, "error"),
                 onTotal: (total) => setIngestionProgress({ processed: 0, total }),
                 onProgress: (processed) => setIngestionProgress({ processed }),
             });
@@ -75,7 +75,7 @@ export function OpenFileButton() {
         const file = dt.files[0];
 
         if (!file.type.startsWith("audio/")) {
-            toast("Only audio files are supported.", "error");
+            toast("Solo se admiten archivos de audio.", "error");
             return;
         }
 
@@ -88,7 +88,7 @@ export function OpenFileButton() {
         try {
             await ingestFile(file, existingPaths, {
                 onBatch: (tracks) => addTracks(tracks),
-                onError: (error) => toast(`Could not read "${error.fileName}"`, "error"),
+                onError: (error) => toast(`No se pudo leer "${error.fileName}"`, "error"),
                 onTotal: (total) => setIngestionProgress({ processed: 0, total }),
                 onProgress: (processed) => setIngestionProgress({ processed }),
             });
@@ -105,7 +105,7 @@ export function OpenFileButton() {
                 onClick={handleClick}
                 disabled={ingestion.isImporting}
             >
-                {ingestion.isImporting ? "Importing..." : "Add File"}
+                {ingestion.isImporting ? "Importando..." : "Añadir archivo"}
 
             </button>
         </div>

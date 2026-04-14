@@ -10,7 +10,7 @@ interface AlbumDetailProps {
     backLabel?: string;
 }
 
-export function AlbumDetail({ album, onBack, backLabel = "Albums" }: AlbumDetailProps) {
+export function AlbumDetail({ album, onBack, backLabel = "Álbumes" }: AlbumDetailProps) {
     const library = useStore((state) => state.library);
     const libraryVersion = useStore((state) => state.libraryVersion);
     const startQueue = useStore((state) => state.startQueue);
@@ -41,18 +41,18 @@ export function AlbumDetail({ album, onBack, backLabel = "Albums" }: AlbumDetail
                     <img src={album.coverArtUrl} alt={album.title} className="album-hero-art" />
                 ) : (
                     <div className="album-art-placeholder large" aria-hidden>
-                        NOTE
+                        ALB
                     </div>
                 )}
 
                 <div className="album-hero-info">
-                    <p className="label">Album</p>
+                    <p className="label">Álbum</p>
                     <h1>{album.title}</h1>
                     <p>{album.artist}</p>
                     {album.year && <p>{album.year}</p>}
-                    <p>{tracks.length} songs</p>
+                    <p>{tracks.length} canciones</p>
                     <button type="button" className="play-btn" onClick={() => playAll(0)}>
-                        Play
+                        Reproducir
                     </button>
                 </div>
             </div>
@@ -62,10 +62,10 @@ export function AlbumDetail({ album, onBack, backLabel = "Albums" }: AlbumDetail
                     <thead>
                         <tr>
                             <th style={{ width: "48px" }}>#</th>
-                            <th style={{ width: "50%" }}>Title</th>
-                            <th style={{ width: "22%" }}>Artist</th>
-                            <th style={{ width: "11%" }}>Time</th>
-                            <th style={{ width: "11%" }}>Plays</th>
+                            <th style={{ width: "50%" }}>Título</th>
+                            <th style={{ width: "22%" }}>Artista</th>
+                            <th style={{ width: "11%" }}>Tiempo</th>
+                            <th style={{ width: "11%" }}>Reproducciones</th>
                             <th style={{ width: "34px" }} />
                         </tr>
                     </thead>

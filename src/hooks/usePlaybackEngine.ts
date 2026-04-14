@@ -69,7 +69,7 @@ export function usePlaybackEngine() {
         });
       } catch {
         if (!cancelled) {
-          toast(`File not found: "${track.title}"`, "error");
+          toast(`Archivo no encontrado: "${track.title}"`, "error");
           advanceToNextTrack();
         }
       }
@@ -112,7 +112,7 @@ export function usePlaybackEngine() {
           }
           break;
         case "error":
-          toast("Playback error on current track", "error");
+          toast("Error de reproducción en la pista actual", "error");
           advanceToNextTrack();
           break;
         default:

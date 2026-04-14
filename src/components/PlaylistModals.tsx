@@ -67,17 +67,17 @@ export function PlaylistModals() {
         const formData = new FormData(form);
         const name = String(formData.get("playlistName") ?? "").trim();
         if (!name) {
-            toast("Playlist name is required.", "error");
+            toast("El nombre de la lista de reproducción es obligatorio.", "error");
             return;
         }
 
         if (name.length > 15) {
-            toast("Playlist name must be 15 characters or fewer.", "error");
+            toast("El nombre de la lista de reproducción debe tener 15 caracteres o menos.", "error");
             return;
         }
 
         if (hasDuplicateName(name)) {
-            toast("A playlist with this name already exists.", "error");
+            toast("Ya existe una lista de reproducción con ese nombre.", "error");
             return;
         }
 
@@ -86,7 +86,7 @@ export function PlaylistModals() {
             if (playlistModal.trackId) {
                 const result = addTrackToPlaylist(created.id, playlistModal.trackId);
                 if (result === "playlist-not-found") {
-                    toast("The playlist could not be found.", "error");
+                    toast("No se pudo encontrar la lista de reproducción.", "error");
                 }
             }
 
@@ -94,7 +94,7 @@ export function PlaylistModals() {
             setActiveView("playlist");
             closePlaylistModal();
         } catch {
-            toast("Could not create playlist.", "error");
+            toast("No se pudo crear la lista de reproducción.", "error");
         }
     }
 
@@ -102,7 +102,7 @@ export function PlaylistModals() {
         event.preventDefault();
 
         if (!targetPlaylist) {
-            toast("Playlist not found.", "error");
+            toast("No se encontró la lista de reproducción.", "error");
             closePlaylistModal();
             return;
         }
@@ -111,17 +111,17 @@ export function PlaylistModals() {
         const formData = new FormData(form);
         const nextName = String(formData.get("playlistName") ?? "").trim();
         if (!nextName) {
-            toast("Playlist name is required.", "error");
+            toast("El nombre de la lista de reproducción es obligatorio.", "error");
             return;
         }
 
         if (nextName.length > 15) {
-            toast("Playlist name must be 15 characters or fewer.", "error");
+            toast("El nombre de la lista de reproducción debe tener 15 caracteres o menos.", "error");
             return;
         }
 
         if (hasDuplicateName(nextName, targetPlaylist.id)) {
-            toast("A playlist with this name already exists.", "error");
+            toast("Ya existe una lista de reproducción con ese nombre.", "error");
             return;
         }
 
@@ -129,13 +129,13 @@ export function PlaylistModals() {
             renamePlaylist(targetPlaylist.id, nextName);
             closePlaylistModal();
         } catch {
-            toast("Could not rename playlist.", "error");
+            toast("No se pudo cambiar el nombre de la lista de reproducción.", "error");
         }
     }
 
     function handleDeleteConfirm() {
         if (!targetPlaylist) {
-            toast("Playlist not found.", "error");
+            toast("No se encontró la lista de reproducción.", "error");
             closePlaylistModal();
             return;
         }
@@ -144,15 +144,15 @@ export function PlaylistModals() {
             deletePlaylist(targetPlaylist.id);
             closePlaylistModal();
         } catch {
-            toast("Could not delete playlist.", "error");
+            toast("No se pudo eliminar la lista de reproducción.", "error");
         }
     }
 
     if (playlistModal.type === "create") {
         return (
             <ModalShell
-                title="Create Playlist"
-                subtitle="Give your new playlist a name."
+                title="Crear lista de reproducción"
+                subtitle="Asigna un nombre a tu nueva lista de reproducción."
                 onClose={closePlaylistModal}
             >
                 <form className="playlist-modal-form" onSubmit={handleCreateSubmit}>
@@ -161,15 +161,15 @@ export function PlaylistModals() {
                         type="text"
                         name="playlistName"
                         className="playlist-modal-input"
-                        placeholder="Playlist name"
+                        placeholder="Nombre de la lista de reproducción"
                         maxLength={15}
                     />
                     <div className="playlist-modal-actions">
                         <button type="button" onClick={closePlaylistModal}>
-                            Cancel
+                            Cancelar
                         </button>
                         <button type="submit" className="play-btn">
-                            Create
+                            Crear
                         </button>
                     </div>
                 </form>
@@ -180,8 +180,8 @@ export function PlaylistModals() {
     if (playlistModal.type === "rename") {
         return (
             <ModalShell
-                title="Rename Playlist"
-                subtitle={targetPlaylist ? targetPlaylist.name : "Rename this playlist."}
+                title="Cambiar nombre de la lista de reproducción"
+                subtitle={targetPlaylist ? targetPlaylist.name : "Cambia el nombre de esta lista de reproducción."}
                 onClose={closePlaylistModal}
             >
                 <form className="playlist-modal-form" onSubmit={handleRenameSubmit}>
@@ -191,15 +191,15 @@ export function PlaylistModals() {
                         name="playlistName"
                         className="playlist-modal-input"
                         defaultValue={targetPlaylist?.name ?? ""}
-                        placeholder="New playlist name"
+                        placeholder="Nuevo nombre de la lista de reproducción"
                         maxLength={15}
                     />
                     <div className="playlist-modal-actions">
                         <button type="button" onClick={closePlaylistModal}>
-                            Cancel
+                            Cancelar
                         </button>
                         <button type="submit" className="play-btn">
-                            Save
+                            Guardar
                         </button>
                     </div>
                 </form>
@@ -209,20 +209,20 @@ export function PlaylistModals() {
 
     return (
         <ModalShell
-            title="Delete Playlist"
+            title="Eliminar lista de reproducción"
             subtitle={
                 targetPlaylist
-                    ? `This will permanently delete ${targetPlaylist.name}.`
-                    : "This playlist no longer exists."
+                    ? `Esto eliminará permanentemente ${targetPlaylist.name}.`
+                    : "Esta lista de reproducción ya no existe."
             }
             onClose={closePlaylistModal}
         >
             <div className="playlist-modal-actions">
                 <button type="button" onClick={closePlaylistModal}>
-                    Cancel
+                    Cancelar
                 </button>
                 <button type="button" className="playlist-modal-danger" onClick={handleDeleteConfirm}>
-                    Delete
+                    Eliminar
                 </button>
             </div>
         </ModalShell>

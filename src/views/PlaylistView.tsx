@@ -27,7 +27,7 @@ export function PlaylistView() {
     const playableTrackIds = tracks.map((track) => track.id);
 
     if (!playlist) {
-        return <section className="empty-state">Select a playlist.</section>;
+        return <section className="empty-state">Selecciona una lista de reproducción.</section>;
     }
 
     const activePlaylist = playlist;
@@ -39,9 +39,9 @@ export function PlaylistView() {
                     <PlaylistArtMosaic trackIds={activePlaylist.trackIds.slice(0, 4)} />
                 </div>
                 <div className="playlist-hero-info">
-                    <p className="label">Playlist</p>
+                    <p className="label">Lista de reproducción</p>
                     <h1>{activePlaylist.name}</h1>
-                    <p>{tracks.length} songs</p>
+                    <p>{tracks.length} canciones</p>
                     <div className="playlist-actions">
                         <button
                             type="button"
@@ -49,37 +49,37 @@ export function PlaylistView() {
                             onClick={() => startQueue(playableTrackIds, 0)}
                             disabled={playableTrackIds.length === 0}
                         >
-                            Play
+                            Reproducir
                         </button>
                         <button
                             type="button"
                             onClick={() => openRenamePlaylistModal(activePlaylist.id)}
                         >
-                            Rename
+                            Cambiar nombre
                         </button>
                         <button
                             type="button"
                             className="danger"
                             onClick={() => openDeletePlaylistModal(activePlaylist.id)}
                         >
-                            Delete
+                            Eliminar
                         </button>
                     </div>
                 </div>
             </div>
 
             {tracks.length === 0 ? (
-                <div className="empty-state">No tracks in this playlist yet.</div>
+                <div className="empty-state">Aún no hay pistas en esta lista de reproducción.</div>
             ) : (
                 <div className="library-table-scroll">
                     <table className="track-table" role="grid">
                         <thead>
                             <tr>
                                 <th style={{ width: "48px" }}>#</th>
-                                <th style={{ width: "32%" }}>Title</th>
-                                <th style={{ width: "23%" }}>Artist</th>
-                                <th style={{ width: "23%" }}>Album</th>
-                                <th style={{ width: "10%" }}>Time</th>
+                                <th style={{ width: "32%" }}>Título</th>
+                                <th style={{ width: "23%" }}>Artista</th>
+                                <th style={{ width: "23%" }}>Álbum</th>
+                                <th style={{ width: "10%" }}>Tiempo</th>
                                 <th style={{ width: "34px" }} />
                             </tr>
                         </thead>

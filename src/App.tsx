@@ -21,9 +21,9 @@ function App() {
     }
 
     if (persistError === "quota_exceeded") {
-      toast("Library changes could not be saved because local storage is full.", "error");
+      toast("No se pudieron guardar los cambios de la biblioteca porque el almacenamiento local está lleno.", "error");
     } else {
-      toast("Library changes could not be saved due to a storage error.", "error");
+      toast("No se pudieron guardar los cambios de la biblioteca debido a un error de almacenamiento.", "error");
     }
 
     clearPersistError();

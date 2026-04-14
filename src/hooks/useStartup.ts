@@ -39,7 +39,7 @@ export function useStartup() {
 
       if (skipped > 0) {
         toast(
-          `${skipped} track${skipped > 1 ? "s" : ""} could not be restored (files moved or deleted).`,
+          `${skipped} pista${skipped > 1 ? "s" : ""} ${skipped === 1 ? "no se pudo restaurar" : "no se pudieron restaurar"} (los archivos se movieron o se eliminaron).`,
           "info",
         );
       }

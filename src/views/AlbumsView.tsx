@@ -29,8 +29,8 @@ export function AlbumsView() {
         <section className="albums-view">
             <div className="view-header">
                 <div>
-                    <h1>Albums</h1>
-                    <p className="track-count">{albums.length} albums</p>
+                    <h1>Álbumes</h1>
+                    <p className="track-count">{albums.length} álbumes</p>
                 </div>
             </div>
 
@@ -39,8 +39,8 @@ export function AlbumsView() {
                     <p className="empty-state-icon" aria-hidden>
                         [*]
                     </p>
-                    <h2>No albums yet</h2>
-                    <p>Import a folder to build your album collection.</p>
+                    <h2>Aún no hay álbumes</h2>
+                    <p>Importa una carpeta para crear tu colección de álbumes.</p>
                     <OpenFolderButton />
                     <OpenFileButton />
                 </div>
@@ -67,7 +67,7 @@ function AlbumCard({ album, onClick }: { album: Album; onClick: () => void }) {
                     <img src={album.coverArtUrl} alt={`${album.title} cover`} />
                 ) : (
                     <div className="album-art-placeholder" aria-hidden>
-                        NOTE
+                        ALB
                     </div>
                 )}
             </div>

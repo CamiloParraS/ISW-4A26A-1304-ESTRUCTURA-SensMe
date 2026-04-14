@@ -69,13 +69,13 @@ export function ContextMenu({
 
         if (result === "already-in-playlist") {
             toast(
-                `${track.title} is already in ${playlist?.name ?? "this playlist"}.`,
+                `${track.title} ya está en ${playlist?.name ?? "esta lista de reproducción"}.`,
                 "info",
             );
         }
 
         if (result === "playlist-not-found") {
-            toast("Could not add track because the playlist no longer exists.", "error");
+            toast("No se pudo añadir la pista porque la lista de reproducción ya no existe.", "error");
         }
 
         onClose();
@@ -102,7 +102,7 @@ export function ContextMenu({
                     onClose();
                 }}
             >
-                Play now
+                Reproducir ahora
             </button>
             <button
                 type="button"
@@ -112,7 +112,7 @@ export function ContextMenu({
                     onClose();
                 }}
             >
-                Play next
+                Reproducir después
             </button>
             <button
                 type="button"
@@ -122,7 +122,7 @@ export function ContextMenu({
                     onClose();
                 }}
             >
-                Add to queue end
+                Añadir al final de la cola
             </button>
 
             {playlistId && (
@@ -136,14 +136,14 @@ export function ContextMenu({
                             onClose();
                         }}
                     >
-                        Remove from this playlist
+                        Eliminar de esta lista de reproducción
                     </button>
                 </>
             )}
 
             <hr className="context-divider" />
 
-            <div className="context-submenu-label">Add to Playlist</div>
+            <div className="context-submenu-label">Añadir a la lista de reproducción</div>
             {playlists.map((playlist) => (
                 <button
                     key={playlist.id}
@@ -166,7 +166,7 @@ export function ContextMenu({
                 className="context-item context-new-playlist"
                 onClick={handleNewPlaylist}
             >
-                + New Playlist
+                + Nueva lista
             </button>
         </div>,
         document.body,

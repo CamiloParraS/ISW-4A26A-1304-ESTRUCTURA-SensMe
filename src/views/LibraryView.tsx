@@ -39,15 +39,15 @@ export function LibraryView() {
             <AlbumDetail
                 album={selectedAlbum}
                 onBack={() => setSelectedAlbumKey(null)}
-                backLabel="Library"
+                backLabel="Biblioteca"
             />
         );
     }
 
     const filterOptions: Array<{ id: LibraryFilter; label: string; count: number }> = [
-        { id: "all", label: "All", count: albums.length + sortedPlaylists.length },
-        { id: "albums", label: "Albums", count: albums.length },
-        { id: "playlists", label: "Playlists", count: sortedPlaylists.length },
+        { id: "all", label: "Todo", count: albums.length + sortedPlaylists.length },
+        { id: "albums", label: "Álbumes", count: albums.length },
+        { id: "playlists", label: "Listas", count: sortedPlaylists.length },
     ];
 
     const showAlbums = filter === "all" || filter === "albums";
@@ -60,12 +60,12 @@ export function LibraryView() {
         <section className="library-view">
             <div className="view-header">
                 <div>
-                    <h1>Library</h1>
+                    <h1>Biblioteca</h1>
                     <p className="track-count">
-                        {albums.length} albums · {sortedPlaylists.length} playlists
+                        {albums.length} álbumes · {sortedPlaylists.length} listas
                     </p>
                 </div>
-                <div className="library-filter-bar" role="tablist" aria-label="Library filters">
+                <div className="library-filter-bar" role="tablist" aria-label="Filtros de biblioteca">
                     {filterOptions.map((option) => (
                         <button
                             key={option.id}
@@ -85,8 +85,8 @@ export function LibraryView() {
                     <p className="empty-state-icon" aria-hidden>
                         [*]
                     </p>
-                    <h2>No library content yet</h2>
-                    <p>Import music to populate albums and artists, or create a playlist to get started.</p>
+                    <h2>Aún no hay contenido en la biblioteca</h2>
+                    <p>Importa música para poblar álbumes y artistas, o crea una lista de reproducción para comenzar.</p>
                     <div className="library-empty-actions">
                         <OpenFolderButton />
                         <OpenFileButton />
@@ -95,7 +95,7 @@ export function LibraryView() {
                             className="open-folder-btn"
                             onClick={() => openCreatePlaylistModal()}
                         >
-                            + New Playlist
+                            + Nueva lista
                         </button>
                     </div>
                 </div>
@@ -103,15 +103,15 @@ export function LibraryView() {
                 <>
 
                     {showPlaylists && sortedPlaylists.length > 0 && (
-                        <LibrarySection title="Playlists" count={sortedPlaylists.length}>
+                        <LibrarySection title="Listas de reproducción" count={sortedPlaylists.length}>
                             <div className="library-grid">
                                 {sortedPlaylists.map((playlist) => (
                                     <LibraryCard
                                         key={playlist.id}
                                         title={playlist.name}
-                                        subtitle={`${playlist.trackIds.length} songs`}
-                                        meta="Playlist"
-                                        placeholder="PL"
+                                        subtitle={`${playlist.trackIds.length} canciones`}
+                                        meta="Lista"
+                                        placeholder="LR"
                                         tone="playlist"
                                         onClick={() => {
                                             setActivePlaylistId(playlist.id);
@@ -124,14 +124,14 @@ export function LibraryView() {
                         </LibrarySection>
                     )}
                     {showAlbums && albums.length > 0 && (
-                        <LibrarySection title="Albums" count={albums.length}>
+                        <LibrarySection title="Álbumes" count={albums.length}>
                             <div className="library-grid">
                                 {albums.map((album) => (
                                     <LibraryCard
                                         key={album.key}
                                         title={album.title}
                                         subtitle={album.artist}
-                                        meta={album.year ? String(album.year) : `${album.trackIds.length} songs`}
+                                        meta={album.year ? String(album.year) : `${album.trackIds.length} canciones`}
                                         image={album.coverArtUrl}
                                         placeholder={getAlbumPlaceholder(album)}
                                         onClick={() => setSelectedAlbumKey(album.key)}

@@ -89,38 +89,43 @@ export function PlaybackBar() {
     };
 
     const isRepeatActive = queueState.repeatMode !== "off";
+    const repeatModeLabels: Record<typeof queueState.repeatMode, string> = {
+        off: "desactivado",
+        all: "todas",
+        one: "una sola",
+    };
 
     return (
-        <div className="playback-bar" aria-label="Playback controls">
+        <div className="playback-bar" aria-label="Controles de reproducción">
             <div className="track-info">
                 {track?.coverArtUrl ? (
-                    <img src={track.coverArtUrl} alt="Album cover" className="mini-cover" />
+                    <img src={track.coverArtUrl} alt="Portada del álbum" className="mini-cover" />
                 ) : (
                     <div className="mini-cover mini-cover--placeholder" aria-hidden />
                 )}
                 <div className="track-text">
-                    <span className="track-title">{track?.title ?? "Nothing playing"}</span>
-                    <span className="track-artist">{track?.artist ?? "Select a track to begin"}</span>
+                    <span className="track-title">{track?.title ?? "Nada en reproducción"}</span>
+                    <span className="track-artist">{track?.artist ?? "Selecciona una pista para comenzar"}</span>
                 </div>
             </div>
 
             <div className="playback-bar__center">
-                <div className="controls playback-bar__transport" aria-label="Playback controls">
+                <div className="controls playback-bar__transport" aria-label="Controles de reproducción">
                     <button
                         type="button"
                         onClick={toggleShuffle}
                         className="transport-button"
-                        aria-label="Shuffle"
+                        aria-label="Aleatorio"
                         aria-pressed={queueState.shuffleEnabled}
                         data-active={queueState.shuffleEnabled}
                     >
                         <Shuffle aria-hidden />
-                        <span className="sr-only">Shuffle</span>
+                        <span className="sr-only">Aleatorio</span>
                     </button>
 
-                    <button type="button" onClick={previous} className="transport-button" aria-label="Previous track">
+                    <button type="button" onClick={previous} className="transport-button" aria-label="Pista anterior">
                         <SkipBack aria-hidden />
-                        <span className="sr-only">Previous track</span>
+                        <span className="sr-only">Pista anterior</span>
                     </button>
 
                     <button
@@ -132,23 +137,23 @@ export function PlaybackBar() {
                                 void play();
                             }
                         }}
-                        aria-label={state.isPlaying ? "Pause" : "Play"}
+                        aria-label={state.isPlaying ? "Pausar" : "Reproducir"}
                         className="transport-button transport-button--primary"
                     >
                         {state.isPlaying ? <Pause aria-hidden /> : <Play aria-hidden />}
-                        <span className="sr-only">{state.isPlaying ? "Pause" : "Play"}</span>
+                        <span className="sr-only">{state.isPlaying ? "Pausar" : "Reproducir"}</span>
                     </button>
 
-                    <button type="button" onClick={next} className="transport-button" aria-label="Next track">
+                    <button type="button" onClick={next} className="transport-button" aria-label="Pista siguiente">
                         <SkipForward aria-hidden />
-                        <span className="sr-only">Next track</span>
+                        <span className="sr-only">Pista siguiente</span>
                     </button>
 
                     <button
                         type="button"
                         onClick={cycleRepeatMode}
                         className="transport-button"
-                        aria-label={`Repeat mode: ${queueState.repeatMode}`}
+                        aria-label={`Modo de repetición: ${repeatModeLabels[queueState.repeatMode]}`}
                         aria-pressed={isRepeatActive}
                         data-active={isRepeatActive}
                     >
@@ -157,7 +162,7 @@ export function PlaybackBar() {
                         ) : (
                             <Repeat aria-hidden />
                         )}
-                        <span className="sr-only">Repeat mode</span>
+                        <span className="sr-only">Modo de repetición</span>
                     </button>
                 </div>
 
@@ -206,13 +211,13 @@ export function PlaybackBar() {
                             setSeekTime(next);
                         }}
                         className="seek-bar"
-                        aria-label="Seek position"
+                        aria-label="Posición de reproducción"
                     />
                     <span>{formatTime(state.duration)}</span>
                 </div>
             </div>
 
-            <div className="secondary-controls playback-bar__utility" aria-label="Utility controls">
+            <div className="secondary-controls playback-bar__utility" aria-label="Controles auxiliares">
                 <input
                     type="range"
                     min={0}
@@ -221,7 +226,7 @@ export function PlaybackBar() {
                     value={state.volume}
                     style={{ "--volume-progress": `${volumeProgress}%` } as CSSProperties}
                     onChange={(event) => setVolume(Number(event.target.value))}
-                    aria-label="Volume"
+                    aria-label="Volumen"
                     className="volume-bar"
                 />
 
@@ -229,11 +234,11 @@ export function PlaybackBar() {
                     type="button"
                     onClick={() => setQueueOpen(!isQueueOpen)}
                     className="utility-button"
-                    aria-label={isQueueOpen ? "Close queue" : "Open queue"}
-                    title={isQueueOpen ? "Close queue" : "Open queue"}
+                    aria-label={isQueueOpen ? "Cerrar cola" : "Abrir cola"}
+                    title={isQueueOpen ? "Cerrar cola" : "Abrir cola"}
                 >
                     <Queue aria-hidden />
-                    <span className="sr-only">Toggle queue</span>
+                    <span className="sr-only">Alternar cola</span>
                 </button>
             </div>
         </div>

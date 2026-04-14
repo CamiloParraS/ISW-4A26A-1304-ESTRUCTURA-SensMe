@@ -19,7 +19,7 @@ export function OpenFolderButton() {
         const pickerWindow = window as DirectoryPickerWindow;
 
         if (!pickerWindow.showDirectoryPicker) {
-            toast("Folder picking is not supported in this browser.", "error");
+            toast("La selección de carpetas no es compatible en este navegador.", "error");
             return;
         }
 
@@ -40,7 +40,7 @@ export function OpenFolderButton() {
         try {
             await ingestFolder(rootHandle, existingPaths, {
                 onBatch: (tracks) => addTracks(tracks),
-                onError: (error) => toast(`Could not read "${error.fileName}"`, "error"),
+                onError: (error) => toast(`No se pudo leer "${error.fileName}"`, "error"),
                 onTotal: (total) => setIngestionProgress({ processed: 0, total }),
                 onProgress: (processed) => setIngestionProgress({ processed }),
             });
@@ -57,7 +57,7 @@ export function OpenFolderButton() {
                 onClick={handleClick}
                 disabled={ingestion.isImporting}
             >
-                {ingestion.isImporting ? "Importing..." : "Open Folder"}
+                {ingestion.isImporting ? "Importando..." : "Abrir carpeta"}
             </button>
         </div>
     );

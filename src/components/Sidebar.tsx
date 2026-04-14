@@ -46,21 +46,21 @@ export function Sidebar() {
 
 
     const navItems = [
-        { id: "songs" as const, label: "Songs", icon: <MusicNotes size={16} weight="bold" aria-hidden /> },
-        { id: "library" as const, label: "Library", icon: <Book size={16} weight="bold" aria-hidden /> },
-        { id: "albums" as const, label: "Albums", icon: <List size={16} weight="bold" aria-hidden /> },
+        { id: "songs" as const, label: "Canciones", icon: <MusicNotes size={16} weight="bold" aria-hidden /> },
+        { id: "library" as const, label: "Biblioteca", icon: <Book size={16} weight="bold" aria-hidden /> },
+        { id: "albums" as const, label: "Álbumes", icon: <List size={16} weight="bold" aria-hidden /> },
     ];
 
     return (
-        <nav className="sidebar" aria-label="Main navigation">
+        <nav className="sidebar" aria-label="Navegación principal">
             <div className="sidebar-top">
                 <div className="sidebar-logo">SensMe</div>
                 <button
                     type="button"
                     className="theme-toggle"
                     onClick={() => setTheme(nextTheme(theme))}
-                    aria-label={resolvedTheme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-                    title={resolvedTheme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+                    aria-label={resolvedTheme === "dark" ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
+                    title={resolvedTheme === "dark" ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
                 >
                     {resolvedTheme === "dark" ? (
                         <Sun size={16} weight="bold" aria-hidden />
@@ -87,7 +87,7 @@ export function Sidebar() {
                 ))}
             </ul>
 
-            <div className="sidebar-section-label">Playlists</div>
+            <div className="sidebar-section-label">Listas de reproducción</div>
             <ul className="sidebar-playlists">
                 {playlists.map((playlist) => (
                     <DroppablePlaylistItem
@@ -101,7 +101,7 @@ export function Sidebar() {
                     />
                 ))}
                 {playlists.length === 0 && (
-                    <li className="sidebar-empty">No playlists yet</li>
+                    <li className="sidebar-empty">Aún no hay listas de reproducción</li>
                 )}
             </ul>
 
@@ -111,7 +111,7 @@ export function Sidebar() {
                     className="new-playlist-btn"
                     onClick={() => openCreatePlaylistModal()}
                 >
-                    + New Playlist
+                    + Nueva lista
                 </button>
                 <div
                     className={`footer-actions ${isDraggingOver ? "footer-drop-over" : ""}`}
@@ -141,7 +141,7 @@ export function Sidebar() {
                         const file = dt.files[0];
 
                         if (!file.type.startsWith("audio/")) {
-                            toast("Only audio files are supported.", "error");
+                            toast("Solo se admiten archivos de audio.", "error");
                             return;
                         }
 
@@ -150,7 +150,7 @@ export function Sidebar() {
                         try {
                             await ingestFile(file, existingPaths, {
                                 onBatch: (tracks) => addTracks(tracks),
-                                onError: (error) => toast(`Could not read "${error.fileName}"`, "error"),
+                                onError: (error) => toast(`No se pudo leer "${error.fileName}"`, "error"),
                                 onTotal: (total) => setIngestionProgress({ processed: 0, total }),
                                 onProgress: (processed) => setIngestionProgress({ processed }),
                             });
@@ -166,7 +166,7 @@ export function Sidebar() {
                 {ingestion.total > 0 && (
                     <div className="footer-status">
                         <p className="footer-ingestion-status">
-                            {`${ingestion.processed} / ${ingestion.total} files processed`}
+                            {`${ingestion.processed} / ${ingestion.total} archivos procesados`}
                         </p>
                     </div>
                 )}

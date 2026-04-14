@@ -56,12 +56,12 @@ export function TrackRow({ track, index, onDoubleClick, showAlbum = true }: Trac
                     className="track-index drag-source-cell"
                     {...attributes}
                     {...listeners}
-                    aria-label={`Drag ${track.title} to a playlist`}
+                    aria-label={`Arrastra ${track.title} a una lista de reproducción`}
                 >
                     {isPlaying ? (
                         <>
                             <WaveformIcon size={16} weight="bold" aria-hidden />
-                            <span className="sr-only">Playing</span>
+                            <span className="sr-only">Reproduciendo</span>
                         </>
                     ) : (
                         index + 1
@@ -159,14 +159,14 @@ export function TrackRow({ track, index, onDoubleClick, showAlbum = true }: Trac
                     <button
                         type="button"
                         className="track-row-menu-btn"
-                        aria-label={`Open actions for ${track.title}`}
+                        aria-label={`Abrir acciones para ${track.title}`}
                         aria-haspopup="menu"
                         aria-expanded={Boolean(menuPosition)}
                         onPointerDown={(event) => event.stopPropagation()}
                         onClick={handleMenuButtonClick}
                     >
                         <DotsThreeOutlineVerticalIcon size={16} weight="bold" aria-hidden />
-                        <span className="sr-only">More actions</span>
+                        <span className="sr-only">Más acciones</span>
                     </button>
                 </td>
             </tr>

@@ -25,14 +25,14 @@ export function QueuePanel({ activeDragType }: { activeDragType?: string | null 
     return (
         <div className="queue-panel">
             <div className="queue-header">
-                <h2>Queue</h2>
-                <button type="button" onClick={() => setQueueOpen(false)} aria-label="Close queue">
-                    Close
+                <h2>Cola</h2>
+                <button type="button" onClick={() => setQueueOpen(false)} aria-label="Cerrar cola">
+                    Cerrar
                 </button>
             </div>
 
             <section>
-                <h3>Now Playing</h3>
+                <h3>Reproduciendo ahora</h3>
                 {nowPlaying ? (
                     <div className="queue-item queue-item--current">
                         {nowPlaying.coverArtUrl ? (
@@ -46,12 +46,12 @@ export function QueuePanel({ activeDragType }: { activeDragType?: string | null 
                         </div>
                     </div>
                 ) : (
-                    <p className="muted">No active track.</p>
+                    <p className="muted">No hay pista activa.</p>
                 )}
             </section>
 
             <section>
-                <h3>Next Up ({queuedTracks.length})</h3>
+                <h3>Siguientes ({queuedTracks.length})</h3>
                 <SortableContext items={queueItemIds} strategy={verticalListSortingStrategy}>
                     <ul className="queue-list">
                         <QueueDropIndicator index={0} isLast={queuedTracks.length === 0} activeDragType={activeDragType} />

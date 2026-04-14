@@ -93,8 +93,8 @@ export function SongsView() {
                     <p className="empty-state-icon" aria-hidden>
                         [*]
                     </p>
-                    <h1>Your library is empty</h1>
-                    <p>Open a folder to scan tracks, album art, and metadata.</p>
+                    <h1>Tu biblioteca está vacía</h1>
+                    <p>Abre una carpeta para escanear pistas, portadas y metadatos.</p>
                     <OpenFolderButton />
                     <OpenFileButton />
                 </div>
@@ -103,11 +103,11 @@ export function SongsView() {
     }
 
     const columns: { field: SortField; label: string; width: string }[] = [
-        { field: "title", label: "Title", width: "32%" },
-        { field: "artist", label: "Artist", width: "21%" },
-        { field: "album", label: "Album", width: "21%" },
-        { field: "duration", label: "Time", width: "11%" },
-        { field: "playCount", label: "Plays", width: "9%" },
+        { field: "title", label: "Título", width: "32%" },
+        { field: "artist", label: "Artista", width: "21%" },
+        { field: "album", label: "Álbum", width: "21%" },
+        { field: "duration", label: "Tiempo", width: "11%" },
+        { field: "playCount", label: "Reproducciones", width: "9%" },
     ];
 
     const visibleCount = Math.ceil(viewportHeight / ROW_HEIGHT) + OVERSCAN * 2;
@@ -124,12 +124,12 @@ export function SongsView() {
         <section className="songs-view">
             <div className="view-header">
                 <div>
-                    <h1>Songs</h1>
-                    <p className="track-count">{tracks.length} songs</p>
+                    <h1>Canciones</h1>
+                    <p className="track-count">{tracks.length} canciones</p>
                 </div>
                 <input
                     type="search"
-                    placeholder="Search title, artist, album..."
+                    placeholder="Buscar título, artista, álbum..."
                     value={query}
                     onChange={(event) => {
                         setScrollTop(0);
@@ -139,7 +139,7 @@ export function SongsView() {
                         setLibraryQuery(event.target.value);
                     }}
                     className="search-input"
-                    aria-label="Search songs"
+                    aria-label="Buscar canciones"
                 />
             </div>
 
@@ -207,7 +207,7 @@ export function SongsView() {
 
             {tracks.length === 0 && (
                 <div className="empty-state">
-                    <p>No songs match your search.</p>
+                    <p>Ninguna canción coincide con tu búsqueda.</p>
                 </div>
             )}
         </section>

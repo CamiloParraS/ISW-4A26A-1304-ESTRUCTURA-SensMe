@@ -189,7 +189,7 @@ export function Shell() {
                 </main>
                 <aside
                     className={`queue-sidebar ${isQueueOpen ? "queue-sidebar--open" : ""}`}
-                    aria-label="Queue panel"
+                    aria-label="Panel de la cola"
                     aria-hidden={!isQueueOpen}
                 >
                     <QueuePanel activeDragType={activeDragType} />
