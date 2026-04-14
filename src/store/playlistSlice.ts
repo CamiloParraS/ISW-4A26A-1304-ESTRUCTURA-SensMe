@@ -17,7 +17,10 @@ export interface PlaylistSlice {
   createPlaylist: (name: string) => Playlist;
   renamePlaylist: (id: PlaylistId, name: string) => void;
   deletePlaylist: (id: PlaylistId) => void;
-  addTrackToPlaylist: (playlistId: PlaylistId, trackId: TrackId) => void;
+  addTrackToPlaylist: (
+    playlistId: PlaylistId,
+    trackId: TrackId,
+  ) => AddTrackToPlaylistResult;
   removeTrackFromPlaylist: (playlistId: PlaylistId, trackId: TrackId) => void;
   reorderPlaylistTracks: (
     playlistId: PlaylistId,
@@ -30,6 +33,11 @@ export interface PlaylistSlice {
     toIdx: number,
   ) => void;
 }
+
+export type AddTrackToPlaylistResult =
+  | "added"
+  | "already-in-playlist"
+  | "playlist-not-found";
 
 type SliceSetter<T> = (
   partial: Partial<T> | ((state: T) => Partial<T>),
@@ -121,19 +129,31 @@ export function createPlaylistSlice<T extends PlaylistSliceState>(
         } as Partial<T>;
       }),
 
-    addTrackToPlaylist: (playlistId, trackId) =>
+    addTrackToPlaylist: (playlistId, trackId) => {
+      let result: AddTrackToPlaylistResult = "playlist-not-found";
+
       set((state) => {
         const playlists = state.playlists.map((playlist) => {
-          if (playlist.id !== playlistId || playlist.trackIdSet.has(trackId)) {
+          if (playlist.id !== playlistId) {
             return playlist;
           }
+
+          if (playlist.trackIdSet.has(trackId)) {
+            result = "already-in-playlist";
+            return playlist;
+          }
+
+          result = "added";
 
           return withUpdatedTrackIds(playlist, [...playlist.trackIds, trackId]);
         });
 
         savePlaylists(playlists);
         return { playlists } as Partial<T>;
-      }),
+      });
+
+      return result;
+    },
 
     removeTrackFromPlaylist: (playlistId, trackId) =>
       set((state) => {

@@ -3,7 +3,7 @@ import { Shell } from "./components/Shell";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { ToastProvider } from "./components/ToastProvider";
 import { loadPersistedAppState } from "./persistence";
-import { defaultQueueState, useStore } from "./store";
+import { defaultQueueState, useStore } from "./store/index";
 import "./styles/theme.css";
 import "./styles/shell.css";
 

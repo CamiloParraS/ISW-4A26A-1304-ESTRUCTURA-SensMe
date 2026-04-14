@@ -3,6 +3,7 @@ import { parseMetadata } from "../ingestion/metadataParser";
 import type {
   Playlist,
   QueueState,
+  SerializedPlaylist,
   SerializedTrack,
   Theme,
   Track,
@@ -16,7 +17,7 @@ const IDB_PREFIX = "handle::";
 
 export interface PersistedAppState {
   tracks: Track[];
-  playlists: Playlist[];
+  playlists: SerializedPlaylist[];
   queueState: QueueState | null;
   theme: Theme;
 }
@@ -136,11 +137,20 @@ export async function hydrateLibrary(
 }
 
 export function savePlaylists(playlists: Playlist[]): void {
-  localStorage.setItem(LS_PLAYLISTS, JSON.stringify(playlists));
+  const serialized: SerializedPlaylist[] = playlists.map(
+    ({ trackIdSet, ...playlist }) => {
+      void trackIdSet;
+      return playlist;
+    },
+  );
+
+  localStorage.setItem(LS_PLAYLISTS, JSON.stringify(serialized));
 }
 
-export function loadPlaylists(): Playlist[] {
-  return parseJSON<Playlist[]>(localStorage.getItem(LS_PLAYLISTS)) ?? [];
+export function loadPlaylists(): SerializedPlaylist[] {
+  return (
+    parseJSON<SerializedPlaylist[]>(localStorage.getItem(LS_PLAYLISTS)) ?? []
+  );
 }
 
 export function saveQueueState(queueState: QueueState): void {

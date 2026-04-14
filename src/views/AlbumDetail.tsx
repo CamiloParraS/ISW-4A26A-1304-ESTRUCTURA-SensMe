@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { TrackRow } from "../components/TrackRow";
-import { useStore } from "../store";
+import { useStore } from "../store/index";
 import type { Album, Track } from "../types";
 import { ArrowBendUpLeftIcon as ArrowBendLeftUpIcon } from "@phosphor-icons/react/dist/ssr";
 
@@ -65,6 +65,7 @@ export function AlbumDetail({ album, onBack }: AlbumDetailProps) {
                             <th style={{ width: "22%" }}>Artist</th>
                             <th style={{ width: "11%" }}>Time</th>
                             <th style={{ width: "11%" }}>Plays</th>
+                            <th style={{ width: "34px" }} />
                         </tr>
                     </thead>
                     <tbody>

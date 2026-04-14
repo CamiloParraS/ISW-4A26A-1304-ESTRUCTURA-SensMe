@@ -10,6 +10,10 @@
   z-index: 20;
 }
 
+body.playlist-modal-open {
+  overflow: hidden;
+}
+
 .queue-panel-backdrop--open {
   pointer-events: auto;
   background: rgb(0 0 0 / 35%);
@@ -195,6 +199,89 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.playlist-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: rgb(0 0 0 / 48%);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.playlist-modal {
+  width: min(460px, calc(100vw - 28px));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: 0 18px 40px rgb(0 0 0 / 35%);
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.playlist-modal-header {
+  display: grid;
+  gap: 6px;
+}
+
+.playlist-modal-header h2 {
+  margin: 0;
+}
+
+.playlist-modal-header p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.playlist-modal-form {
+  display: grid;
+  gap: 12px;
+}
+
+.playlist-modal-input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-primary);
+  padding: 0 12px;
+  font: inherit;
+}
+
+.playlist-modal-input:focus {
+  outline: 2px solid color-mix(in srgb, var(--accent) 44%, transparent);
+  outline-offset: 1px;
+}
+
+.playlist-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.playlist-modal-actions button {
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 0 12px;
+}
+
+.playlist-modal-actions .play-btn {
+  color: #fff;
+}
+
+.playlist-modal-danger {
+  color: #fff !important;
+  background: #b63f3f !important;
+  border-color: #b63f3f !important;
 }
 
 .toast-viewport {

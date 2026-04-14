@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { OpenFolderButton } from "../components/OpenFolderButton";
 import { TrackRow } from "../components/TrackRow";
-import { useStore } from "../store";
+import { useStore } from "../store/index";
 import type { SortField } from "../types";
 import { searchTracks } from "../utils/search";
 import { sortTracks } from "../utils/sort";
@@ -105,11 +105,11 @@ export function LibraryView() {
     }
 
     const columns: { field: SortField; label: string; width: string }[] = [
-        { field: "title", label: "Title", width: "34%" },
-        { field: "artist", label: "Artist", width: "22%" },
-        { field: "album", label: "Album", width: "22%" },
+        { field: "title", label: "Title", width: "32%" },
+        { field: "artist", label: "Artist", width: "21%" },
+        { field: "album", label: "Album", width: "21%" },
         { field: "duration", label: "Time", width: "11%" },
-        { field: "playCount", label: "Plays", width: "11%" },
+        { field: "playCount", label: "Plays", width: "9%" },
     ];
 
     const visibleCount = Math.ceil(viewportHeight / ROW_HEIGHT) + OVERSCAN * 2;
@@ -176,12 +176,13 @@ export function LibraryView() {
                                     )}
                                 </th>
                             ))}
+                            <th style={{ width: "34px" }} />
                         </tr>
                     </thead>
                     <tbody>
                         {topSpacer > 0 && (
                             <tr className="track-spacer" aria-hidden>
-                                <td colSpan={6} style={{ height: `${topSpacer}px` }} />
+                                <td colSpan={7} style={{ height: `${topSpacer}px` }} />
                             </tr>
                         )}
 
@@ -199,7 +200,7 @@ export function LibraryView() {
 
                         {bottomSpacer > 0 && (
                             <tr className="track-spacer" aria-hidden>
-                                <td colSpan={6} style={{ height: `${bottomSpacer}px` }} />
+                                <td colSpan={7} style={{ height: `${bottomSpacer}px` }} />
                             </tr>
                         )}
                     </tbody>

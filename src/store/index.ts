@@ -1,13 +1,7 @@
 import { create } from "zustand";
 import { LibraryMap } from "../ds/LibraryMap";
-import {
-  saveHandle,
-  saveLibrary,
-  savePlaylists,
-  saveTheme,
-} from "../persistence";
+import { saveHandle, saveLibrary, saveTheme } from "../persistence";
 import type {
-  Playlist,
   PlaylistId,
   QueueState,
   SortState,
@@ -15,6 +9,11 @@ import type {
   Track,
   TrackId,
 } from "../types";
+import {
+  createPlaylistSlice,
+  type PlaylistSlice,
+  type PlaylistSliceState,
+} from "./playlistSlice";
 import { createQueueSlice, type QueueSlice } from "./queueSlice";
 
 interface IngestionProgress {
@@ -22,6 +21,11 @@ interface IngestionProgress {
   processed: number;
   total: number;
 }
+
+type PlaylistModalState =
+  | { type: "create"; trackId?: TrackId }
+  | { type: "rename"; playlistId: PlaylistId }
+  | { type: "delete"; playlistId: PlaylistId };
 
 interface LibrarySlice {
   library: LibraryMap;
@@ -33,11 +37,6 @@ interface LibrarySlice {
   updateTrack: (id: TrackId, patch: Partial<Track>) => void;
 }
 
-interface PlaylistSlice {
-  playlists: Playlist[];
-  setPlaylists: (playlists: Playlist[]) => void;
-}
-
 interface UISlice {
   theme: Theme;
   activeView: "library" | "albums" | "playlist";
@@ -46,6 +45,7 @@ interface UISlice {
   libraryQuery: string;
   ingestionProgress: IngestionProgress;
   isQueueOpen: boolean;
+  playlistModal: PlaylistModalState | null;
   setTheme: (theme: Theme) => void;
   setActiveView: (view: UISlice["activeView"]) => void;
   setActivePlaylistId: (playlistId: PlaylistId | null) => void;
@@ -53,9 +53,17 @@ interface UISlice {
   setLibraryQuery: (query: string) => void;
   setIngestionProgress: (patch: Partial<IngestionProgress>) => void;
   setQueueOpen: (open: boolean) => void;
+  openCreatePlaylistModal: (trackId?: TrackId) => void;
+  openRenamePlaylistModal: (playlistId: PlaylistId) => void;
+  openDeletePlaylistModal: (playlistId: PlaylistId) => void;
+  closePlaylistModal: () => void;
 }
 
-export type Store = LibrarySlice & PlaylistSlice & QueueSlice & UISlice;
+export type Store = LibrarySlice &
+  PlaylistSlice &
+  QueueSlice &
+  UISlice &
+  PlaylistSliceState;
 
 export const defaultQueueState: QueueState = {
   currentTrackId: null,
@@ -66,11 +74,134 @@ export const defaultQueueState: QueueState = {
   originalOrder: [],
 };
 
+function createLibrarySlice(
+  set: (partial: Partial<Store> | ((state: Store) => Partial<Store>)) => void,
+): LibrarySlice {
+  return {
+    library: new LibraryMap(),
+    libraryVersion: 0,
+    existingPaths: new Set<string>(),
+
+    setLibrary: (tracks) =>
+      set((state) => {
+        try {
+          for (const existing of state.library.toArray()) {
+            if (existing.coverArtUrl?.startsWith("blob:")) {
+              try {
+                URL.revokeObjectURL(existing.coverArtUrl);
+              } catch {
+                // ignore
+              }
+            }
+          }
+        } catch {
+          // ignore
+        }
+
+        const nextLibrary = new LibraryMap();
+        for (const track of tracks) {
+          nextLibrary.add(track);
+        }
+
+        void Promise.all(
+          tracks.map((track) =>
+            saveHandle(track.id, track.fileHandle).catch(() => undefined),
+          ),
+        );
+
+        saveLibrary(nextLibrary.toArray());
+
+        return {
+          library: nextLibrary,
+          libraryVersion: state.libraryVersion + 1,
+          existingPaths: new Set(tracks.map((track) => track.filePath)),
+        };
+      }),
+
+    addTracks: (tracks) =>
+      set((state) => {
+        const nextExistingPaths = new Set(state.existingPaths);
+
+        for (const track of tracks) {
+          if (
+            nextExistingPaths.has(track.filePath) ||
+            state.library.has(track.id)
+          ) {
+            continue;
+          }
+
+          state.library.add(track);
+          nextExistingPaths.add(track.filePath);
+          void saveHandle(track.id, track.fileHandle).catch(() => undefined);
+        }
+
+        saveLibrary(state.library.toArray());
+
+        return {
+          library: state.library,
+          libraryVersion: state.libraryVersion + 1,
+          existingPaths: nextExistingPaths,
+        };
+      }),
+
+    removeTrack: (id) =>
+      set((state) => {
+        const track = state.library.get(id);
+
+        if (!track) {
+          return {};
+        }
+
+        if (track.coverArtUrl?.startsWith("blob:")) {
+          try {
+            URL.revokeObjectURL(track.coverArtUrl);
+          } catch {
+            // ignore
+          }
+        }
+
+        state.library.remove(id);
+        const nextExistingPaths = new Set(state.existingPaths);
+        nextExistingPaths.delete(track.filePath);
+        saveLibrary(state.library.toArray());
+
+        return {
+          library: state.library,
+          libraryVersion: state.libraryVersion + 1,
+          existingPaths: nextExistingPaths,
+        };
+      }),
+
+    updateTrack: (id, patch) =>
+      set((state) => {
+        const track = state.library.get(id);
+
+        if (!track) {
+          return {};
+        }
+
+        state.library.update(id, patch);
+
+        const nextExistingPaths = new Set(state.existingPaths);
+        if (patch.filePath && patch.filePath !== track.filePath) {
+          nextExistingPaths.delete(track.filePath);
+          nextExistingPaths.add(patch.filePath);
+        }
+
+        saveLibrary(state.library.toArray());
+
+        return {
+          library: state.library,
+          libraryVersion: state.libraryVersion + 1,
+          existingPaths: nextExistingPaths,
+        };
+      }),
+  };
+}
+
 export const useStore = create<Store>((set, get) => ({
-  library: new LibraryMap(),
-  libraryVersion: 0,
-  existingPaths: new Set<string>(),
-  playlists: [],
+  ...createLibrarySlice(set),
+  ...createPlaylistSlice(set),
   ...createQueueSlice(set, get),
   theme: "system",
   activeView: "library",
@@ -86,131 +217,7 @@ export const useStore = create<Store>((set, get) => ({
     total: 0,
   },
   isQueueOpen: false,
-  setLibrary: (tracks) =>
-    set((state) => {
-      // Revoke any existing blob: object URLs from the previous library
-      try {
-        for (const existing of state.library.toArray()) {
-          if (
-            existing.coverArtUrl &&
-            existing.coverArtUrl.startsWith("blob:")
-          ) {
-            try {
-              URL.revokeObjectURL(existing.coverArtUrl);
-            } catch {
-              // ignore
-            }
-          }
-        }
-      } catch {
-        // ignore
-      }
-
-      const library = new LibraryMap();
-
-      for (const track of tracks) {
-        library.add(track);
-      }
-
-      void Promise.all(
-        tracks.map((track) =>
-          saveHandle(track.id, track.fileHandle).catch(() => undefined),
-        ),
-      );
-
-      saveLibrary(library.toArray());
-
-      return {
-        library,
-        libraryVersion: state.libraryVersion + 1,
-        existingPaths: new Set(tracks.map((track) => track.filePath)),
-      };
-    }),
-  addTracks: (tracks) =>
-    set((state) => {
-      const nextExistingPaths = new Set(state.existingPaths);
-
-      for (const track of tracks) {
-        if (
-          nextExistingPaths.has(track.filePath) ||
-          state.library.has(track.id)
-        ) {
-          continue;
-        }
-
-        state.library.add(track);
-        nextExistingPaths.add(track.filePath);
-
-        void saveHandle(track.id, track.fileHandle).catch(() => undefined);
-      }
-
-      saveLibrary(state.library.toArray());
-
-      return {
-        library: state.library,
-        libraryVersion: state.libraryVersion + 1,
-        existingPaths: nextExistingPaths,
-      };
-    }),
-  removeTrack: (id) =>
-    set((state) => {
-      const track = state.library.get(id);
-
-      if (!track) {
-        return {};
-      }
-
-      // If the track used a blob object URL for cover art, revoke it to free memory
-      if (track.coverArtUrl && track.coverArtUrl.startsWith("blob:")) {
-        try {
-          URL.revokeObjectURL(track.coverArtUrl);
-        } catch {
-          // ignore
-        }
-      }
-
-      state.library.remove(id);
-
-      const nextExistingPaths = new Set(state.existingPaths);
-      nextExistingPaths.delete(track.filePath);
-
-      saveLibrary(state.library.toArray());
-
-      return {
-        library: state.library,
-        libraryVersion: state.libraryVersion + 1,
-        existingPaths: nextExistingPaths,
-      };
-    }),
-  updateTrack: (id, patch) =>
-    set((state) => {
-      const track = state.library.get(id);
-
-      if (!track) {
-        return {};
-      }
-
-      state.library.update(id, patch);
-
-      const nextExistingPaths = new Set(state.existingPaths);
-      if (patch.filePath && patch.filePath !== track.filePath) {
-        nextExistingPaths.delete(track.filePath);
-        nextExistingPaths.add(patch.filePath);
-      }
-
-      saveLibrary(state.library.toArray());
-
-      return {
-        library: state.library,
-        libraryVersion: state.libraryVersion + 1,
-        existingPaths: nextExistingPaths,
-      };
-    }),
-  setPlaylists: (playlists) =>
-    set(() => {
-      savePlaylists(playlists);
-      return { playlists };
-    }),
+  playlistModal: null,
   setTheme: (theme) =>
     set(() => {
       saveTheme(theme);
@@ -228,4 +235,11 @@ export const useStore = create<Store>((set, get) => ({
       },
     })),
   setQueueOpen: (isQueueOpen) => set({ isQueueOpen }),
+  openCreatePlaylistModal: (trackId) =>
+    set({ playlistModal: { type: "create", trackId } }),
+  openRenamePlaylistModal: (playlistId) =>
+    set({ playlistModal: { type: "rename", playlistId } }),
+  openDeletePlaylistModal: (playlistId) =>
+    set({ playlistModal: { type: "delete", playlistId } }),
+  closePlaylistModal: () => set({ playlistModal: null }),
 }));

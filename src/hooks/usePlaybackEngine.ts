@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { audioEngine } from "../playback/AudioEngine";
-import { useStore } from "../store";
+import { useStore } from "../store/index";
 import { useToast } from "./useToast";
 
 export interface PlaybackState {

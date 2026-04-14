@@ -68,6 +68,7 @@ export interface Playlist {
   id: PlaylistId;
   name: string;
   trackIds: TrackId[];
+  trackIdSet: Set<TrackId>;
   createdAt: number;
   updatedAt: number;
 }
@@ -113,7 +114,7 @@ export interface ImportReconciliationCandidate {
 }
 
 export type SerializedTrack = Omit<Track, "fileHandle">;
-export type SerializedPlaylist = Playlist;
+export type SerializedPlaylist = Omit<Playlist, "trackIdSet">;
 
 export type Theme = "light" | "dark" | "system";
 

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { OpenFolderButton } from "../components/OpenFolderButton";
-import { useStore } from "../store";
+import { useStore } from "../store/index";
 import type { Album } from "../types";
 import { AlbumDetail } from "./AlbumDetail";
 
