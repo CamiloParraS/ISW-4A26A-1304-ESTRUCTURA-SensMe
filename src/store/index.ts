@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import { LibraryMap } from "../ds/LibraryMap";
-import { saveHandle, saveLibrary, saveTheme } from "../persistence";
+import {
+  saveHandle,
+  saveLibrary,
+  saveTheme,
+  type PersistResult,
+} from "../persistence";
 import type {
   PlaylistId,
   QueueState,
@@ -44,6 +49,7 @@ interface UISlice {
   sortState: SortState;
   libraryQuery: string;
   ingestionProgress: IngestionProgress;
+  persistError: Exclude<PersistResult, "ok"> | null;
   isQueueOpen: boolean;
   playlistModal: PlaylistModalState | null;
   setTheme: (theme: Theme) => void;
@@ -52,6 +58,7 @@ interface UISlice {
   setSortState: (sortState: SortState) => void;
   setLibraryQuery: (query: string) => void;
   setIngestionProgress: (patch: Partial<IngestionProgress>) => void;
+  clearPersistError: () => void;
   setQueueOpen: (open: boolean) => void;
   openCreatePlaylistModal: (trackId?: TrackId) => void;
   openRenamePlaylistModal: (playlistId: PlaylistId) => void;
@@ -135,12 +142,13 @@ function createLibrarySlice(
           void saveHandle(track.id, track.fileHandle).catch(() => undefined);
         }
 
-        saveLibrary(state.library.toArray());
+        const persistResult = saveLibrary(state.library.toArray());
 
         return {
           library: state.library,
           libraryVersion: state.libraryVersion + 1,
           existingPaths: nextExistingPaths,
+          persistError: persistResult === "ok" ? null : persistResult,
         };
       }),
 
@@ -216,6 +224,7 @@ export const useStore = create<Store>((set, get) => ({
     processed: 0,
     total: 0,
   },
+  persistError: null,
   isQueueOpen: false,
   playlistModal: null,
   setTheme: (theme) =>
@@ -234,6 +243,7 @@ export const useStore = create<Store>((set, get) => ({
         ...patch,
       },
     })),
+  clearPersistError: () => set({ persistError: null }),
   setQueueOpen: (isQueueOpen) => set({ isQueueOpen }),
   openCreatePlaylistModal: (trackId) =>
     set({ playlistModal: { type: "create", trackId } }),

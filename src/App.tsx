@@ -2,37 +2,32 @@ import { useEffect } from "react";
 import { Shell } from "./components/Shell";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { ToastProvider } from "./components/ToastProvider";
-import { loadPersistedAppState } from "./persistence";
-import { defaultQueueState, useStore } from "./store/index";
+import { useStartup } from "./hooks/useStartup";
+import { useToast } from "./hooks/useToast";
+import { useStore } from "./store/index";
 import "./styles/theme.css";
 import "./styles/shell.css";
 
 function App() {
-  const setLibrary = useStore((state) => state.setLibrary);
-  const setPlaylists = useStore((state) => state.setPlaylists);
-  const setQueueState = useStore((state) => state.setQueueState);
-  const setTheme = useStore((state) => state.setTheme);
+  const persistError = useStore((state) => state.persistError);
+  const clearPersistError = useStore((state) => state.clearPersistError);
+  const { toast } = useToast();
+
+  useStartup();
 
   useEffect(() => {
-    let cancelled = false;
+    if (!persistError) {
+      return;
+    }
 
-    void (async () => {
-      const persisted = await loadPersistedAppState();
+    if (persistError === "quota_exceeded") {
+      toast("Library changes could not be saved because local storage is full.", "error");
+    } else {
+      toast("Library changes could not be saved due to a storage error.", "error");
+    }
 
-      if (cancelled) {
-        return;
-      }
-
-      setLibrary(persisted.tracks);
-      setPlaylists(persisted.playlists);
-      setQueueState(persisted.queueState ?? defaultQueueState);
-      setTheme(persisted.theme);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [setLibrary, setPlaylists, setQueueState, setTheme]);
+    clearPersistError();
+  }, [clearPersistError, persistError, toast]);
 
   return (
     <ThemeProvider>

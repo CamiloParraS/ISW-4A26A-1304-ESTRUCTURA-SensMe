@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { PlaylistArtMosaic } from "../components/PlaylistArtMosaic";
 import { SortableTrackRow } from "../components/SortableTrackRow";
@@ -8,20 +9,28 @@ export function PlaylistView() {
     const activePlaylistId = useStore((state) => state.activePlaylistId);
     const playlists = useStore((state) => state.playlists);
     const library = useStore((state) => state.library);
+    const libraryVersion = useStore((state) => state.libraryVersion);
     const startQueue = useStore((state) => state.startQueue);
     const openRenamePlaylistModal = useStore((state) => state.openRenamePlaylistModal);
     const openDeletePlaylistModal = useStore((state) => state.openDeletePlaylistModal);
 
     const playlist = playlists.find((item) => item.id === activePlaylistId);
+    const playlistTrackIds = playlist?.trackIds ?? [];
+
+    const tracks: Track[] = useMemo(() => {
+        void libraryVersion;
+        return playlistTrackIds
+            .map((trackId) => library.get(trackId))
+            .filter((track): track is Track => Boolean(track));
+    }, [playlistTrackIds, library, libraryVersion]);
+
+    const playableTrackIds = tracks.map((track) => track.id);
+
     if (!playlist) {
         return <section className="empty-state">Select a playlist.</section>;
     }
 
     const activePlaylist = playlist;
-
-    const tracks: Track[] = activePlaylist.trackIds
-        .map((trackId) => library.get(trackId))
-        .filter((track): track is Track => Boolean(track));
 
     return (
         <section className="playlist-view">
@@ -37,8 +46,8 @@ export function PlaylistView() {
                         <button
                             type="button"
                             className="play-btn"
-                            onClick={() => startQueue(activePlaylist.trackIds, 0)}
-                            disabled={activePlaylist.trackIds.length === 0}
+                            onClick={() => startQueue(playableTrackIds, 0)}
+                            disabled={playableTrackIds.length === 0}
                         >
                             Play
                         </button>
@@ -75,7 +84,7 @@ export function PlaylistView() {
                             </tr>
                         </thead>
                         <SortableContext
-                            items={activePlaylist.trackIds}
+                            items={playableTrackIds}
                             strategy={verticalListSortingStrategy}
                         >
                             <tbody>
@@ -86,7 +95,7 @@ export function PlaylistView() {
                                         track={track}
                                         index={index}
                                         onDoubleClick={() =>
-                                            startQueue(activePlaylist.trackIds, index)
+                                            startQueue(playableTrackIds, index)
                                         }
                                     />
                                 ))}

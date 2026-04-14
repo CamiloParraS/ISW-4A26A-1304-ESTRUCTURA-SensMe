@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { audioEngine } from "../playback/AudioEngine";
 import { useStore } from "../store/index";
 import { useToast } from "./useToast";
@@ -27,9 +27,21 @@ export function usePlaybackEngine() {
 
   const previousTrackIdRef = useRef<string | null>(null);
 
+  const advanceToNextTrack = useCallback(() => {
+    const nextTrackId = playNext();
+    if (!nextTrackId) {
+      audioEngine.pause();
+      audioEngine.seek(0);
+    }
+
+    return nextTrackId;
+  }, [playNext]);
+
   useEffect(() => {
     if (!currentTrackId) {
       previousTrackIdRef.current = null;
+      audioEngine.pause();
+      audioEngine.seek(0);
       return;
     }
 
@@ -58,7 +70,7 @@ export function usePlaybackEngine() {
       } catch {
         if (!cancelled) {
           toast(`File not found: "${track.title}"`, "error");
-          playNext();
+          advanceToNextTrack();
         }
       }
     })();
@@ -66,7 +78,7 @@ export function usePlaybackEngine() {
     return () => {
       cancelled = true;
     };
-  }, [currentTrackId, library, playNext, toast, updateTrack]);
+  }, [advanceToNextTrack, currentTrackId, library, toast, updateTrack]);
 
   const playbackState = currentTrackId
     ? state
@@ -96,18 +108,18 @@ export function usePlaybackEngine() {
           break;
         case "ended":
           if (repeatMode !== "one") {
-            playNext();
+            advanceToNextTrack();
           }
           break;
         case "error":
           toast("Playback error on current track", "error");
-          playNext();
+          advanceToNextTrack();
           break;
         default:
           break;
       }
     });
-  }, [playNext, repeatMode, toast]);
+  }, [advanceToNextTrack, repeatMode, toast]);
 
   return {
     state: playbackState,
@@ -130,6 +142,17 @@ export function usePlaybackEngine() {
         audioEngine.seek(0);
       }
     },
-    next: () => playNext(),
+    next: () => {
+      const store = useStore.getState();
+
+      // If user requests next while in "repeat one" mode, switch to
+      // repeat-all and disable the audio loop so the next track can play.
+      if (store.queueState.repeatMode === "one") {
+        store.setRepeatMode("all");
+        audioEngine.setLoop(false);
+      }
+
+      return advanceToNextTrack();
+    },
   };
 }

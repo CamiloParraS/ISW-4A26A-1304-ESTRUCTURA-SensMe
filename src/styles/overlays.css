@@ -376,6 +376,8 @@ body.playlist-modal-open {
 }
 
 .playlist-modal-actions .play-btn {
+  background: color-mix(in oklab, var(--accent) 58%, #000 42%);
+  border-color: color-mix(in oklab, var(--accent) 58%, #000 42%);
   color: #fff;
 }
 

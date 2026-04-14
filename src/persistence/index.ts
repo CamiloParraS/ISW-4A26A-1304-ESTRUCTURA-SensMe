@@ -22,6 +22,8 @@ export interface PersistedAppState {
   theme: Theme;
 }
 
+export type PersistResult = "ok" | "quota_exceeded" | "error";
+
 function serializeTrack(track: Track): SerializedTrack {
   const { fileHandle, ...rest } = track;
   void fileHandle;
@@ -40,14 +42,18 @@ function parseJSON<T>(raw: string | null): T | null {
   }
 }
 
-export function saveLibrary(tracks: Track[]): void {
+export function saveLibrary(tracks: Track[]): PersistResult {
   try {
-    const data = tracks.map(serializeTrack);
-    localStorage.setItem(LS_LIBRARY, JSON.stringify(data));
+    const data = JSON.stringify(tracks.map(serializeTrack));
+    localStorage.setItem(LS_LIBRARY, data);
+    return "ok";
   } catch (error) {
     if (error instanceof DOMException && error.name === "QuotaExceededError") {
       console.warn("[Persistence] localStorage quota exceeded");
+      return "quota_exceeded";
     }
+
+    return "error";
   }
 }
 
@@ -103,11 +109,19 @@ export async function hydrateLibrary(
           }
         }
 
+        let file: File;
+
+        try {
+          file = await permissionHandle.getFile();
+        } catch {
+          // Handle is stale: the file was moved or deleted.
+          return null;
+        }
+
         let coverArtUrl = track.coverArtUrl;
 
         if (coverArtUrl?.startsWith("blob:")) {
           try {
-            const file = await permissionHandle.getFile();
             const raw = await parseMetadata(file);
 
             if (raw.coverArt) {
