@@ -14,7 +14,7 @@ export interface QueueSlice {
   /** Insert a track so it plays immediately after the current track. */
   playNextInQueue: (trackId: TrackId) => void;
   insertIntoQueue: (trackId: TrackId, index: number) => void;
-
+  moveInQueue: (fromIdx: number, toIdx: number) => void;
   removeFromQueue: (index: number) => void;
   toggleShuffle: () => void;
   setRepeatMode: (mode: RepeatMode) => void;
@@ -42,24 +42,67 @@ function nextQueueState(
   set({ queueState });
 }
 
-function spliceAfterCurrent(
-  originalOrder: TrackId[],
-  currentTrackId: TrackId | null,
-  trackId: TrackId,
-): TrackId[] {
-  const currentIndex = currentTrackId
-    ? originalOrder.indexOf(currentTrackId)
+function splitOriginalOrder(queueState: QueueState): {
+  prefix: TrackId[];
+  upcoming: TrackId[];
+} {
+  const currentIndex = queueState.currentTrackId
+    ? queueState.originalOrder.indexOf(queueState.currentTrackId)
     : -1;
 
   if (currentIndex >= 0) {
-    return [
-      ...originalOrder.slice(0, currentIndex + 1),
-      trackId,
-      ...originalOrder.slice(currentIndex + 1),
-    ];
+    return {
+      prefix: queueState.originalOrder.slice(0, currentIndex + 1),
+      upcoming: queueState.originalOrder.slice(currentIndex + 1),
+    };
   }
 
-  return [trackId, ...originalOrder];
+  return {
+    prefix: [],
+    upcoming: [...queueState.originalOrder],
+  };
+}
+
+function updateOriginalOrder(
+  queueState: QueueState,
+  nextUpcoming: TrackId[],
+): TrackId[] {
+  const { prefix } = splitOriginalOrder(queueState);
+  return [...prefix, ...nextUpcoming];
+}
+
+function insertAt<T>(items: T[], index: number, item: T): T[] {
+  const nextItems = [...items];
+  const targetIndex = Math.min(Math.max(index, 0), nextItems.length);
+  nextItems.splice(targetIndex, 0, item);
+  return nextItems;
+}
+
+function removeAt<T>(items: T[], index: number): T[] {
+  if (index < 0 || index >= items.length) {
+    return items;
+  }
+
+  const nextItems = [...items];
+  nextItems.splice(index, 1);
+  return nextItems;
+}
+
+function moveAt<T>(items: T[], fromIdx: number, toIdx: number): T[] {
+  if (fromIdx < 0 || fromIdx >= items.length) {
+    return items;
+  }
+
+  const nextItems = [...items];
+  const [movedItem] = nextItems.splice(fromIdx, 1);
+
+  if (movedItem === undefined) {
+    return items;
+  }
+
+  const targetIndex = Math.min(Math.max(toIdx, 0), nextItems.length);
+  nextItems.splice(targetIndex, 0, movedItem);
+  return nextItems;
 }
 
 export function createQueueSlice<T extends { queueState: QueueState }>(
@@ -107,13 +150,11 @@ export function createQueueSlice<T extends { queueState: QueueState }>(
       const { queue, history, currentTrackId, repeatMode, originalOrder } =
         queueState;
 
-      // repeat-one: stay on the same track
       if (repeatMode === "one") {
         return currentTrackId;
       }
 
       if (queue.length === 0) {
-        // repeat-all: rebuild the queue from originalOrder
         if (repeatMode === "all" && originalOrder.length > 0) {
           const restarted = queueState.shuffleEnabled
             ? shuffled([...originalOrder])
@@ -129,12 +170,10 @@ export function createQueueSlice<T extends { queueState: QueueState }>(
           return nextTrack;
         }
 
-        // queue exhausted, nothing to play
         nextQueueState(set, { ...queueState, currentTrackId: null });
         return null;
       }
 
-      // Normal advance: consume the first queued item.
       const list = toChainBuffer(queue);
       const nextTrack = list.takeStart() ?? null;
       if (!nextTrack) return null;
@@ -177,81 +216,67 @@ export function createQueueSlice<T extends { queueState: QueueState }>(
 
     addToQueue: (trackId) => {
       const { queueState } = get();
-      const list = toChainBuffer(queueState.queue);
-      list.addEnd(trackId); // O(1)
+      const nextQueue = [...queueState.queue, trackId];
 
       nextQueueState(set, {
         ...queueState,
-        queue: list.exportItems(),
-        originalOrder: [...queueState.originalOrder, trackId],
+        queue: nextQueue,
+        originalOrder: updateOriginalOrder(queueState, nextQueue),
       });
     },
 
     playNextInQueue: (trackId) => {
       const { queueState } = get();
-      const list = toChainBuffer(queueState.queue);
-      list.addStart(trackId); // O(1)
+      const nextQueue = [trackId, ...queueState.queue];
 
       nextQueueState(set, {
         ...queueState,
-        queue: list.exportItems(),
-        originalOrder: spliceAfterCurrent(
-          queueState.originalOrder,
-          queueState.currentTrackId,
-          trackId,
-        ),
+        queue: nextQueue,
+        originalOrder: updateOriginalOrder(queueState, nextQueue),
       });
     },
 
     insertIntoQueue: (trackId, index) => {
       const { queueState } = get();
-      const list = toChainBuffer(queueState.queue);
-      list.addAt(index, trackId); // O(n) walk to position
-
-      // Mirror in originalOrder: insertion at index 0 is "play next",
-      // any other index sits that many positions ahead in the remaining queue.
-      const nextOriginalOrder =
-        index === 0
-          ? spliceAfterCurrent(
-              queueState.originalOrder,
-              queueState.currentTrackId,
-              trackId,
-            )
-          : [...queueState.originalOrder, trackId]; // simplest safe fallback for mid-queue inserts
+      const nextQueue = insertAt(queueState.queue, index, trackId);
 
       nextQueueState(set, {
         ...queueState,
-        queue: list.exportItems(),
-        originalOrder: nextOriginalOrder,
+        queue: nextQueue,
+        originalOrder: updateOriginalOrder(queueState, nextQueue),
+      });
+    },
+
+    moveInQueue: (fromIdx, toIdx) => {
+      const { queueState } = get();
+      const nextQueue = moveAt(queueState.queue, fromIdx, toIdx);
+
+      if (nextQueue === queueState.queue) {
+        return;
+      }
+
+      nextQueueState(set, {
+        ...queueState,
+        queue: nextQueue,
+        originalOrder: updateOriginalOrder(queueState, nextQueue),
       });
     },
 
     removeFromQueue: (index) => {
       const { queueState } = get();
 
-      // Guard: ignore out-of-range indices silently
       if (index < 0 || index >= queueState.queue.length) return;
 
-      const list = toChainBuffer(queueState.queue);
-      const removedTrack = list.takeAt(index); // O(n) walk
+      const nextQueue = removeAt(queueState.queue, index);
 
-      if (removedTrack === undefined) return; // shouldn't happen given the guard
-
-      // Also prune from originalOrder. We only remove the first occurrence to
-      // handle edge-cases where the same track appears multiple times.
-      const orderIndex = queueState.originalOrder.indexOf(removedTrack);
-      const nextOriginalOrder =
-        orderIndex >= 0
-          ? [
-              ...queueState.originalOrder.slice(0, orderIndex),
-              ...queueState.originalOrder.slice(orderIndex + 1),
-            ]
-          : queueState.originalOrder;
+      if (nextQueue === queueState.queue) {
+        return;
+      }
 
       nextQueueState(set, {
         ...queueState,
-        queue: list.exportItems(),
-        originalOrder: nextOriginalOrder,
+        queue: nextQueue,
+        originalOrder: updateOriginalOrder(queueState, nextQueue),
       });
     },
 
@@ -261,7 +286,6 @@ export function createQueueSlice<T extends { queueState: QueueState }>(
         queueState;
 
       if (!shuffleEnabled) {
-        // Shuffle the current queue in place using a temporary buffer.
         const list = toChainBuffer(queue);
         const shuffledArray = shuffled(list.exportItems());
         nextQueueState(set, {
@@ -272,7 +296,6 @@ export function createQueueSlice<T extends { queueState: QueueState }>(
         return;
       }
 
-      // Restore original order starting after the current track
       const currentIndex = currentTrackId
         ? originalOrder.indexOf(currentTrackId)
         : -1;

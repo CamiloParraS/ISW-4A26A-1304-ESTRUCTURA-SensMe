@@ -1,4 +1,4 @@
-.library-view,
+.songs-view,
 .albums-view,
 .album-detail,
 .playlist-placeholder,
@@ -9,10 +9,10 @@
   padding: 20px;
 }
 
-/* Make the library view fill the main content area and let the
+/* Make the songs view fill the main content area and let the
    table scroll area size to the available space instead of using
    viewport-based calculations. This prevents overflow issues. */
-.library-view {
+.songs-view {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -416,6 +416,161 @@ body.context-menu-open .library-table-scroll {
 
 .playlist-art-placeholder {
   background: var(--surface-2);
+}
+
+.library-view {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 100%;
+}
+
+.library-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.library-filter-button {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: inherit;
+  min-height: 34px;
+  padding: 0 14px;
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    color var(--transition);
+}
+
+.library-filter-button:hover,
+.library-filter-button:focus-visible {
+  border-color: var(--accent);
+}
+
+.library-filter-button--active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.library-section {
+  display: grid;
+  gap: 14px;
+}
+
+.library-section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.library-section-header h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.library-section-count {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 20px;
+}
+
+.library-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 12px;
+  background: transparent;
+  color: inherit;
+}
+
+.library-card--button {
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    transform var(--transition);
+}
+
+.library-card--button:hover,
+.library-card--button:focus-visible {
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+
+.library-card-art {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.library-card-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.library-card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  letter-spacing: 0.08em;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent) 16%, var(--surface-2)),
+    var(--surface-2)
+  );
+}
+
+.library-card-placeholder--artist {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.library-card-placeholder--playlist {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.library-card-title,
+.library-card-subtitle,
+.library-card-meta {
+  margin: 0;
+}
+
+.library-card-title {
+  font-weight: 600;
+}
+
+.library-card-subtitle,
+.library-card-meta {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.library-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .playlist-art-mosaic {

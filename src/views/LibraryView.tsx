@@ -1,219 +1,231 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { OpenFolderButton } from "../components/OpenFolderButton";
-import { TrackRow } from "../components/TrackRow";
+import { PlaylistArtMosaic } from "../components/PlaylistArtMosaic";
 import { useStore } from "../store/index";
-import type { SortField } from "../types";
-import { searchTracks } from "../utils/search";
-import { sortTracks } from "../utils/sort";
+import type { Album, Playlist } from "../types";
+import { AlbumDetail } from "./AlbumDetail";
 
-const ROW_HEIGHT = 52;
-const OVERSCAN = 8;
+type LibraryFilter = "all" | "albums" | "artists" | "playlists";
 
 export function LibraryView() {
     const library = useStore((state) => state.library);
     const libraryVersion = useStore((state) => state.libraryVersion);
-    const startQueue = useStore((state) => state.startQueue);
-    const sortState = useStore((state) => state.sortState);
-    const setSortState = useStore((state) => state.setSortState);
-    const query = useStore((state) => state.libraryQuery);
-    const setLibraryQuery = useStore((state) => state.setLibraryQuery);
-    const ingestion = useStore((state) => state.ingestionProgress);
+    const playlists = useStore((state) => state.playlists);
+    const setActiveView = useStore((state) => state.setActiveView);
+    const setActivePlaylistId = useStore((state) => state.setActivePlaylistId);
+    const openCreatePlaylistModal = useStore((state) => state.openCreatePlaylistModal);
 
-    const [debouncedQuery, setDebouncedQuery] = useState(query);
-    const [scrollTop, setScrollTop] = useState(0);
-    const [viewportHeight, setViewportHeight] = useState(420);
-    const scrollRef = useRef<HTMLDivElement | null>(null);
+    const [filter, setFilter] = useState<LibraryFilter>("all");
+    const [selectedAlbumKey, setSelectedAlbumKey] = useState<string | null>(null);
 
-    useEffect(() => {
-        const timeoutId = window.setTimeout(() => {
-            setDebouncedQuery(query);
-        }, 120);
-
-        return () => {
-            window.clearTimeout(timeoutId);
-        };
-    }, [query]);
-
-    useEffect(() => {
-        const element = scrollRef.current;
-
-        if (!element) {
-            return;
-        }
-
-        const observer = new ResizeObserver((entries) => {
-            const entry = entries[0];
-            if (entry) {
-                setViewportHeight(entry.contentRect.height);
-            }
-        });
-
-        observer.observe(element);
-
-        return () => {
-            observer.disconnect();
-        };
-    }, []);
-
-    const tracks = useMemo(() => {
+    const albums = useMemo<Album[]>(() => {
         void libraryVersion;
-        const allTracks = library.toArray();
-        const filtered = debouncedQuery ? searchTracks(debouncedQuery, allTracks) : allTracks;
-        return sortTracks(filtered, sortState.field, sortState.dir);
-    }, [library, libraryVersion, debouncedQuery, sortState.field, sortState.dir]);
+        return [...library.albums.values()].sort((left, right) =>
+            left.title.localeCompare(right.title),
+        );
+    }, [library, libraryVersion]);
 
-    function handleHeaderClick(field: SortField) {
-        setScrollTop(0);
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = 0;
-        }
+    const sortedPlaylists = useMemo<Playlist[]>(() => {
+        return [...playlists].sort((left, right) => left.name.localeCompare(right.name));
+    }, [playlists]);
 
-        if (field === sortState.field) {
-            setSortState({
-                field,
-                dir: sortState.dir === "asc" ? "desc" : "asc",
-            });
-            return;
-        }
+    const selectedAlbum = selectedAlbumKey
+        ? albums.find((album) => album.key === selectedAlbumKey) ?? null
+        : null;
 
-        setSortState({ field, dir: "asc" });
-    }
-
-    function handleRowDoubleClick(index: number) {
-        const ids = tracks.map((track) => track.id);
-        startQueue(ids, index);
-    }
-
-    const totalTracks = library.size();
-
-    if (totalTracks === 0) {
+    if (selectedAlbum) {
         return (
-            <section className="empty-state empty-state--hero">
-                <p className="empty-state-icon" aria-hidden>
-                    [*]
-                </p>
-                <h1>Your library is empty</h1>
-                <p>Open a folder to scan tracks, album art, and metadata.</p>
-                <OpenFolderButton />
-                {ingestion.isImporting && (
-                    <p className="text-muted">
-                        Importing {ingestion.processed} / {ingestion.total} files...
-                    </p>
-                )}
-            </section>
+            <AlbumDetail
+                album={selectedAlbum}
+                onBack={() => setSelectedAlbumKey(null)}
+                backLabel="Library"
+            />
         );
     }
 
-    const columns: { field: SortField; label: string; width: string }[] = [
-        { field: "title", label: "Title", width: "32%" },
-        { field: "artist", label: "Artist", width: "21%" },
-        { field: "album", label: "Album", width: "21%" },
-        { field: "duration", label: "Time", width: "11%" },
-        { field: "playCount", label: "Plays", width: "9%" },
+    const filterOptions: Array<{ id: LibraryFilter; label: string; count: number }> = [
+        { id: "all", label: "All", count: albums.length + sortedPlaylists.length },
+        { id: "albums", label: "Albums", count: albums.length },
+        { id: "playlists", label: "Playlists", count: sortedPlaylists.length },
     ];
 
-    const visibleCount = Math.ceil(viewportHeight / ROW_HEIGHT) + OVERSCAN * 2;
-    const startIndex = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - OVERSCAN);
-    const endIndex = Math.min(tracks.length, startIndex + visibleCount);
-    const visibleTracks = tracks.slice(startIndex, endIndex);
-    const topSpacer = startIndex * ROW_HEIGHT;
-    const bottomSpacer = Math.max(
-        0,
-        tracks.length * ROW_HEIGHT - topSpacer - visibleTracks.length * ROW_HEIGHT,
-    );
+    const showAlbums = filter === "all" || filter === "albums";
+    const showPlaylists = filter === "all" || filter === "playlists";
+    const hasContent =
+        (showAlbums && albums.length > 0) ||
+        (showPlaylists && sortedPlaylists.length > 0);
 
     return (
         <section className="library-view">
             <div className="view-header">
                 <div>
                     <h1>Library</h1>
-                    <p className="track-count">{tracks.length} songs</p>
+                    <p className="track-count">
+                        {albums.length} albums · {sortedPlaylists.length} playlists
+                    </p>
                 </div>
-                <input
-                    type="search"
-                    placeholder="Search title, artist, album..."
-                    value={query}
-                    onChange={(event) => {
-                        setScrollTop(0);
-                        if (scrollRef.current) {
-                            scrollRef.current.scrollTop = 0;
-                        }
-                        setLibraryQuery(event.target.value);
-                    }}
-                    className="search-input"
-                    aria-label="Search library"
-                />
+                <div className="library-filter-bar" role="tablist" aria-label="Library filters">
+                    {filterOptions.map((option) => (
+                        <button
+                            key={option.id}
+                            type="button"
+                            className={`library-filter-button ${filter === option.id ? "library-filter-button--active" : ""}`}
+                            aria-pressed={filter === option.id}
+                            onClick={() => setFilter(option.id)}
+                        >
+                            {option.label} ({option.count})
+                        </button>
+                    ))}
+                </div>
             </div>
 
-            <div
-                className="library-table-scroll"
-                ref={scrollRef}
-                onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
-            >
-                <table className="track-table" role="grid">
-                    <thead>
-                        <tr>
-                            <th style={{ width: "48px" }}>#</th>
-                            {columns.map((column) => (
-                                <th
-                                    key={column.field}
-                                    style={{ width: column.width }}
-                                    className="sortable-header"
-                                    aria-sort={
-                                        sortState.field === column.field
-                                            ? sortState.dir === "asc"
-                                                ? "ascending"
-                                                : "descending"
-                                            : "none"
-                                    }
-                                    onClick={() => handleHeaderClick(column.field)}
-                                >
-                                    {column.label}
-                                    {sortState.field === column.field && (
-                                        <span aria-hidden>
-                                            {sortState.dir === "asc" ? " ^" : " v"}
-                                        </span>
-                                    )}
-                                </th>
-                            ))}
-                            <th style={{ width: "34px" }} />
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {topSpacer > 0 && (
-                            <tr className="track-spacer" aria-hidden>
-                                <td colSpan={7} style={{ height: `${topSpacer}px` }} />
-                            </tr>
-                        )}
-
-                        {visibleTracks.map((track, index) => {
-                            const absoluteIndex = startIndex + index;
-                            return (
-                                <TrackRow
-                                    key={track.id}
-                                    track={track}
-                                    index={absoluteIndex}
-                                    onDoubleClick={() => handleRowDoubleClick(absoluteIndex)}
-                                />
-                            );
-                        })}
-
-                        {bottomSpacer > 0 && (
-                            <tr className="track-spacer" aria-hidden>
-                                <td colSpan={7} style={{ height: `${bottomSpacer}px` }} />
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            {tracks.length === 0 && (
-                <div className="empty-state">
-                    {debouncedQuery
-                        ? `No results for "${debouncedQuery}".`
-                        : "Open a folder to add music."}
+            {!hasContent ? (
+                <div className="empty-state empty-state--hero compact">
+                    <p className="empty-state-icon" aria-hidden>
+                        [*]
+                    </p>
+                    <h2>No library content yet</h2>
+                    <p>Import music to populate albums and artists, or create a playlist to get started.</p>
+                    <div className="library-empty-actions">
+                        <OpenFolderButton />
+                        <button
+                            type="button"
+                            className="open-folder-btn"
+                            onClick={() => openCreatePlaylistModal()}
+                        >
+                            + New Playlist
+                        </button>
+                    </div>
                 </div>
+            ) : (
+                <>
+
+                    {showPlaylists && sortedPlaylists.length > 0 && (
+                        <LibrarySection title="Playlists" count={sortedPlaylists.length}>
+                            <div className="library-grid">
+                                {sortedPlaylists.map((playlist) => (
+                                    <LibraryCard
+                                        key={playlist.id}
+                                        title={playlist.name}
+                                        subtitle={`${playlist.trackIds.length} songs`}
+                                        meta="Playlist"
+                                        placeholder="PL"
+                                        tone="playlist"
+                                        onClick={() => {
+                                            setActivePlaylistId(playlist.id);
+                                            setActiveView("playlist");
+                                        }}
+                                        art={<PlaylistArtMosaic trackIds={playlist.trackIds.slice(0, 4)} />}
+                                    />
+                                ))}
+                            </div>
+                        </LibrarySection>
+                    )}
+                    {showAlbums && albums.length > 0 && (
+                        <LibrarySection title="Albums" count={albums.length}>
+                            <div className="library-grid">
+                                {albums.map((album) => (
+                                    <LibraryCard
+                                        key={album.key}
+                                        title={album.title}
+                                        subtitle={album.artist}
+                                        meta={album.year ? String(album.year) : `${album.trackIds.length} songs`}
+                                        image={album.coverArtUrl}
+                                        placeholder={getAlbumPlaceholder(album)}
+                                        onClick={() => setSelectedAlbumKey(album.key)}
+                                    />
+                                ))}
+                            </div>
+                        </LibrarySection>
+                    )}
+                </>
             )}
         </section>
     );
 }
+
+function LibrarySection({
+    title,
+    count,
+    children,
+}: {
+    title: string;
+    count: number;
+    children: ReactNode;
+}) {
+    return (
+        <section className="library-section">
+            <div className="library-section-header">
+                <h2>{title}</h2>
+                <p className="library-section-count">{count}</p>
+            </div>
+            {children}
+        </section>
+    );
+}
+
+function LibraryCard({
+    title,
+    subtitle,
+    meta,
+    placeholder,
+    image,
+    art,
+    tone,
+    onClick,
+}: {
+    title: string;
+    subtitle: string;
+    meta: string;
+    placeholder: string;
+    image?: string | null;
+    art?: ReactNode;
+    tone?: "artist" | "playlist";
+    onClick?: () => void;
+}) {
+    const content = (
+        <>
+            <div className="library-card-art">
+                {art ? (
+                    art
+                ) : image ? (
+                    <img src={image} alt={`${title} cover`} />
+                ) : (
+                    <div
+                        className={`library-card-placeholder ${tone ? `library-card-placeholder--${tone}` : ""}`}
+                        aria-hidden
+                    >
+                        {placeholder}
+                    </div>
+                )}
+            </div>
+            <p className="library-card-title">{title}</p>
+            <p className="library-card-subtitle">{subtitle}</p>
+            <p className="library-card-meta">{meta}</p>
+        </>
+    );
+
+    if (onClick) {
+        return (
+            <button
+                type="button"
+                className="library-card library-card--button"
+                onClick={onClick}
+                aria-label={title}
+            >
+                {content}
+            </button>
+        );
+    }
+
+    return <article className="library-card">{content}</article>;
+}
+
+function getAlbumPlaceholder(album: Album): string {
+    if (album.title.trim()) {
+        return album.title.slice(0, 2).toUpperCase();
+    }
+
+    return "AL";
+}
+

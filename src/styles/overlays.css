@@ -1,50 +1,14 @@
-.queue-panel-backdrop {
-  position: fixed;
-  inset: 0;
-  border: 0;
-  margin: 0;
-  padding: 0;
-  background: rgb(0 0 0 / 0%);
-  pointer-events: none;
-  transition: background var(--transition);
-  z-index: 20;
-}
-
 body.playlist-modal-open {
   overflow: hidden;
 }
 
-.queue-panel-backdrop--open {
-  pointer-events: auto;
-  background: rgb(0 0 0 / 35%);
-}
-
 .queue-panel {
-  position: fixed;
-  left: 256px;
-  right: 20px;
-  bottom: 84px;
-  max-height: min(60vh, 620px);
-  overflow: auto;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  padding: 16px;
-  z-index: 30;
   display: grid;
+  grid-template-rows: auto auto 1fr;
   gap: 16px;
-  transform: translateY(18px);
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    transform var(--transition),
-    opacity var(--transition);
-}
-
-.queue-panel--open {
-  transform: translateY(0);
-  opacity: 1;
-  pointer-events: auto;
+  height: 100%;
+  overflow: auto;
+  padding: 16px;
 }
 
 .queue-header {
@@ -72,8 +36,9 @@ body.playlist-modal-open {
   margin: 0;
   padding: 0;
   list-style: none;
-  display: grid;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .queue-item {
@@ -81,18 +46,28 @@ body.playlist-modal-open {
   border-radius: var(--radius-md);
   padding: 10px;
   display: grid;
-  grid-template-columns: 34px 1fr auto;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
   background: var(--surface);
+  position: relative;
 }
 
 .queue-item--current {
   border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
   background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  grid-template-columns: 34px minmax(0, 1fr);
 }
 
-.queue-item img,
+.queue-item--sortable {
+  cursor: grab;
+}
+
+.queue-item--sortable:active {
+  cursor: grabbing;
+}
+
+.queue-cover,
 .queue-cover-placeholder {
   width: 34px;
   height: 34px;
@@ -104,12 +79,138 @@ body.playlist-modal-open {
   background: var(--surface-2);
 }
 
-.queue-index {
-  color: var(--text-muted);
+.queue-item-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.queue-item-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.queue-item-artist {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .muted {
   color: var(--text-muted);
+}
+
+.queue-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.queue-action-btn {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: inherit;
+  cursor: pointer;
+  min-height: 30px;
+  min-width: 30px;
+  padding: 0;
+}
+
+.queue-action-btn:hover {
+  background: var(--surface-2);
+}
+
+.queue-action-btn--remove {
+  color: #b63f3f;
+}
+
+.queue-drop-target {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  padding: 12px;
+  text-align: center;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  transition:
+    border-color var(--transition),
+    background var(--transition),
+    color var(--transition);
+}
+
+.queue-drop-indicator {
+  height: 14px;
+  margin: 3px 10px;
+  position: relative;
+}
+
+.queue-drop-indicator::before,
+.queue-drop-indicator::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--border) 60%, transparent);
+  top: 50%;
+  transform: translateY(-50%);
+  transition:
+    background var(--transition),
+    box-shadow var(--transition),
+    transform var(--transition);
+}
+
+.queue-drop-indicator::after {
+  opacity: 0;
+}
+
+.queue-drop-indicator--active::before,
+.queue-drop-indicator--active::after {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent) 72%, transparent),
+    color-mix(in srgb, var(--accent) 45%, transparent)
+  );
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
+.queue-drop-indicator--active::before {
+  transform: translateY(-50%) scaleY(1.2);
+}
+
+.queue-drop-indicator--last {
+  margin-bottom: 0;
+}
+
+.queue-drop-indicator--last::after {
+  opacity: 0;
+}
+
+.queue-item--drop-over::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  height: 4px;
+  top: -4px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent) 68%, transparent),
+    color-mix(in srgb, var(--accent) 44%, transparent)
+  );
+  border-radius: 3px;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 18%);
+}
+
+.queue-drop-target--active {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  color: var(--foreground);
 }
 
 .context-menu {

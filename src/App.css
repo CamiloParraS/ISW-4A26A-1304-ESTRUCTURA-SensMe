@@ -1,9 +1,10 @@
 .app-shell {
   width: min(1120px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 40px 0 48px;
+  padding: auto 1fr auto;
   display: grid;
   gap: 32px;
+  min-height: 100vh;
 }
 
 /* Panel base styles */
@@ -660,10 +661,6 @@
     bottom: 10px;
     width: auto;
   }
-}
-
-.app-shell {
-  padding-bottom: 172px;
 }
 
 .track-actions {

@@ -7,9 +7,10 @@ import { ArrowBendUpLeftIcon as ArrowBendLeftUpIcon } from "@phosphor-icons/reac
 interface AlbumDetailProps {
     album: Album;
     onBack: () => void;
+    backLabel?: string;
 }
 
-export function AlbumDetail({ album, onBack }: AlbumDetailProps) {
+export function AlbumDetail({ album, onBack, backLabel = "Albums" }: AlbumDetailProps) {
     const library = useStore((state) => state.library);
     const libraryVersion = useStore((state) => state.libraryVersion);
     const startQueue = useStore((state) => state.startQueue);
@@ -32,7 +33,7 @@ export function AlbumDetail({ album, onBack }: AlbumDetailProps) {
         <section className="album-detail">
             <button type="button" className="back-btn" onClick={onBack}>
                 <ArrowBendLeftUpIcon size={16} weight="bold" aria-hidden />
-                <span style={{ marginLeft: 8 }}>Albums</span>
+                <span style={{ marginLeft: 8 }}>{backLabel}</span>
             </button>
 
             <div className="album-hero">

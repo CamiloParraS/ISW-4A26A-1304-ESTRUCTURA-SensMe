@@ -201,6 +201,50 @@ describe("queueSlice", () => {
     });
   });
 
+  it("insertIntoQueue inserts at the requested position and mirrors original order", () => {
+    const { slice, getQueueState } = createHarness({
+      currentTrackId: "t1",
+      queue: ["t2", "t3"],
+      history: [],
+      shuffleEnabled: false,
+      repeatMode: "off",
+      originalOrder: ["t1", "t2", "t3"],
+    });
+
+    slice.insertIntoQueue("t4", 1);
+
+    expect(getQueueState()).toEqual({
+      currentTrackId: "t1",
+      queue: ["t2", "t4", "t3"],
+      history: [],
+      shuffleEnabled: false,
+      repeatMode: "off",
+      originalOrder: ["t1", "t2", "t4", "t3"],
+    });
+  });
+
+  it("moveInQueue reorders upcoming tracks and keeps original order aligned", () => {
+    const { slice, getQueueState } = createHarness({
+      currentTrackId: "t1",
+      queue: ["t2", "t3", "t4"],
+      history: [],
+      shuffleEnabled: false,
+      repeatMode: "off",
+      originalOrder: ["t1", "t2", "t3", "t4"],
+    });
+
+    slice.moveInQueue(2, 0);
+
+    expect(getQueueState()).toEqual({
+      currentTrackId: "t1",
+      queue: ["t4", "t2", "t3"],
+      history: [],
+      shuffleEnabled: false,
+      repeatMode: "off",
+      originalOrder: ["t1", "t4", "t2", "t3"],
+    });
+  });
+
   it("startQueue clamps invalid start indexes", () => {
     const trackIds: TrackId[] = ["t1", "t2", "t3"];
     const { slice, getQueueState } = createHarness();

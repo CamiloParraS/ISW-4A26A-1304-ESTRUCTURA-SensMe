@@ -1,4 +1,4 @@
-import { Moon, Sun, Book, List } from "@phosphor-icons/react";
+import { Moon, Sun, Book, List, MusicNotes } from "@phosphor-icons/react";
 import { useDroppable } from "@dnd-kit/core";
 import { OpenFolderButton } from "./OpenFolderButton";
 import { PlaylistArtMosaic } from "./PlaylistArtMosaic";
@@ -33,6 +33,7 @@ export function Sidebar() {
     const resolvedTheme = getResolvedTheme(theme);
 
     const navItems = [
+        { id: "songs" as const, label: "Songs", icon: <MusicNotes size={16} weight="bold" aria-hidden /> },
         { id: "library" as const, label: "Library", icon: <Book size={16} weight="bold" aria-hidden /> },
         { id: "albums" as const, label: "Albums", icon: <List size={16} weight="bold" aria-hidden /> },
     ];

@@ -39,7 +39,7 @@ interface LibrarySlice {
 
 interface UISlice {
   theme: Theme;
-  activeView: "library" | "albums" | "playlist";
+  activeView: "songs" | "library" | "albums" | "playlist";
   activePlaylistId: PlaylistId | null;
   sortState: SortState;
   libraryQuery: string;
@@ -204,7 +204,7 @@ export const useStore = create<Store>((set, get) => ({
   ...createPlaylistSlice(set),
   ...createQueueSlice(set, get),
   theme: "system",
-  activeView: "library",
+  activeView: "songs",
   activePlaylistId: null,
   sortState: {
     field: "title",

@@ -71,6 +71,11 @@ export function PlaylistModals() {
             return;
         }
 
+        if (name.length > 15) {
+            toast("Playlist name must be 15 characters or fewer.", "error");
+            return;
+        }
+
         if (hasDuplicateName(name)) {
             toast("A playlist with this name already exists.", "error");
             return;
@@ -107,6 +112,11 @@ export function PlaylistModals() {
         const nextName = String(formData.get("playlistName") ?? "").trim();
         if (!nextName) {
             toast("Playlist name is required.", "error");
+            return;
+        }
+
+        if (nextName.length > 15) {
+            toast("Playlist name must be 15 characters or fewer.", "error");
             return;
         }
 
@@ -152,7 +162,7 @@ export function PlaylistModals() {
                         name="playlistName"
                         className="playlist-modal-input"
                         placeholder="Playlist name"
-                        maxLength={80}
+                        maxLength={15}
                     />
                     <div className="playlist-modal-actions">
                         <button type="button" onClick={closePlaylistModal}>
@@ -182,7 +192,7 @@ export function PlaylistModals() {
                         className="playlist-modal-input"
                         defaultValue={targetPlaylist?.name ?? ""}
                         placeholder="New playlist name"
-                        maxLength={80}
+                        maxLength={15}
                     />
                     <div className="playlist-modal-actions">
                         <button type="button" onClick={closePlaylistModal}>

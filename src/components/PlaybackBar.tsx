@@ -52,6 +52,7 @@ export function PlaybackBar() {
     const toggleShuffle = useStore((store) => store.toggleShuffle);
     const setRepeatMode = useStore((store) => store.setRepeatMode);
     const setQueueOpen = useStore((store) => store.setQueueOpen);
+    const isQueueOpen = useStore((store) => store.isQueueOpen);
 
     const track = queueState.currentTrackId
         ? library.get(queueState.currentTrackId)
@@ -224,9 +225,15 @@ export function PlaybackBar() {
                     className="volume-bar"
                 />
 
-                <button type="button" onClick={() => setQueueOpen(true)} className="utility-button" aria-label="Open queue">
+                <button
+                    type="button"
+                    onClick={() => setQueueOpen(!isQueueOpen)}
+                    className="utility-button"
+                    aria-label={isQueueOpen ? "Close queue" : "Open queue"}
+                    title={isQueueOpen ? "Close queue" : "Open queue"}
+                >
                     <Queue aria-hidden />
-                    <span className="sr-only">Open queue</span>
+                    <span className="sr-only">Toggle queue</span>
                 </button>
             </div>
         </div>
